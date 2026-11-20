@@ -73,6 +73,7 @@
 
 - `admission_campaigns 1—N admission_applications`; campaign targets year and optionally grade.
 - `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_application_fee_snapshots, admission_payments`.
+- `admission_payments 1—N admission_payment_refunds`; each refund references the original payment, is capped against net paid, and follows approval/audit rules.
 - `admission_campaigns 1—N admission_fee_settings`; settings are the canonical, versioned free/paid/waiver/refund configuration. Each submitted application stores its own fee snapshot; admission payments reference that snapshot and remain distinct from tuition payments. Admission payments have refund records referencing the original payment with caps/approval. Do not duplicate mutable fee amounts on campaign rows.
 - `admission_applications 0..1—1 students` after authorised conversion (application's converted_student_id); conversion should be transactional and idempotent.
 
