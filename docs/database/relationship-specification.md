@@ -73,8 +73,7 @@
 
 - `admission_campaigns 1—N admission_applications`; campaign targets year and optionally grade.
 - `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_application_fee_snapshots, admission_payments`.
-- `admission_campaigns 1—N admission_fee_settings`; settings are canonical and versioned. Each submitted application stores its own fee snapshot. Admission payments reference that snapshot and remain distinct from tuition payments.
-- `admission_campaigns 1—N admission_fee_settings`; fee settings are the canonical, versioned free/paid/waiver/refund configuration. Applications freeze the applicable fee snapshot; payments reference that snapshot. Never duplicate mutable fee amounts on campaign rows or tuition invoices.
+- `admission_campaigns 1—N admission_fee_settings`; settings are the canonical, versioned free/paid/waiver/refund configuration. Each submitted application stores its own fee snapshot; admission payments reference that snapshot and remain distinct from tuition payments. Do not duplicate mutable fee amounts on campaign rows.
 - `admission_applications 0..1—1 students` after authorised conversion (application's converted_student_id); conversion should be transactional and idempotent.
 - Campaign fee settings and payments reference the campaign/application; admission payment should not be confused with school fee payment.
 
@@ -110,7 +109,9 @@
 
 - `user_profiles 1—N portal_preferences, portal_notifications, portal_access_logs, portal_device_tokens, notification_preferences` within tenant scope.
 - Announcements target audience via explicit validated scope; where delivery needs durable recipient list, materialise recipients separately (future table recommendation: `announcement_recipients`).
-- `message_threads 1—N messages`; thread participants through message_recipients; attachments reference files.
+- `message_threads 1—N messages`; thread participants through `message_recipients`; attachments reference files.
+- `messages 1—N message_read_receipts` per recipient/message; thread-level last-read is a convenience marker only.
+- `messages 1—N message_moderation_actions`; actions are append-only and restricted to authorized moderators.
 - Notification templates feed delivery records; provider logs map external events to deliveries. Delivery status updates are event-driven and deduplicated.
 
 ## J. Additional services
