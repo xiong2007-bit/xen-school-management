@@ -3,7 +3,7 @@
 **Version:** XEN School Management v3.0 · **Status:** Design specification only · **Database:** PostgreSQL
 
 ## Conventions
-Unless stated otherwise, tables use `id uuid primary key default gen_random_uuid()`, `created_at timestamptz not null default now()`, and `updated_at timestamptz not null default now()`. Tenant-owned tables include `school_id uuid not null references schools(id)`. Use `deleted_at` only for records whose lifecycle permits soft deletion; never soft-delete posted financial records to conceal activity. Enum-like values should be lookup tables or constrained text where tenant configurability is needed. All dates/times are timezone-aware where an instant is represented; date-only school events use `date`. Money is exact numeric or integer minor units, with currency explicitly stored. Sensitive fields are access-restricted and encrypted where appropriate.
+Unless stated otherwise, tables use `id uuid primary key default gen_random_uuid()` (UUIDv4 as the approved initial strategy), `created_at timestamptz not null default now()`, and `updated_at timestamptz not null default now()`. Tenant-owned tables include `school_id uuid not null references schools(id)`. Use `deleted_at` only for records whose lifecycle permits soft deletion; never soft-delete posted financial records to conceal activity. Enum-like values should be lookup tables or constrained text where tenant configurability is needed. All dates/times are timezone-aware where an instant is represented; date-only school events use `date`. Money is exact numeric or integer minor units, with currency explicitly stored. Sensitive fields are access-restricted and encrypted where appropriate.
 
 ## 1. Platform and school tenancy
 
