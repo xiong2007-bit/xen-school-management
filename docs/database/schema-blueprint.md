@@ -48,6 +48,8 @@ Classify each row and sensitive field. Public website content must never be popu
 
 | Table | PK | Tenant key | Key FKs / constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|
+| school_groups (future) | id | platform | group code/name/status; no tenant bypass | P4; active/retired | Platform admin; scoped group grants only |
+| school_group_memberships (future) | id | platform | group/school; valid membership dates; unique active pair | P4 | Group-scoped grants only; school tenant RLS remains |
 | schools | id | tenant root | slug unique; country/currency/timezone valid; status checked | P1; onboarding/trial/active/suspended/closed | Platform provisioning; school users only own safe settings |
 | school_campuses | id | school_id | FK school; unique school/code; primary-campus rule | P1; active/inactive | Membership + campus scope |
 | user_profiles | id (= auth user) | none | FK auth identity; locale/timezone validated | P2; profile active/deactivated | Self access; scoped school admins limited fields |
@@ -130,7 +132,7 @@ Classify each row and sensitive field. Public website content must never be popu
 
 | Table | PK | Tenant key | Key FKs / constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|---|
-| admission_campaigns | id | school_id | year/calendar/grade; opening/closing; fee config; schema version | P1/P2; draft/published/open/closed/archived | Admissions staff; public safe campaign projection |
+| admission_campaigns | id | school_id | year/calendar/grade; opening/closing; form schema/version | P1/P2; draft/published/open/closed/archived | Admissions staff; public safe campaign projection |
 | admission_applications | id | school_id | campaign; unique reference; status transition; converted student unique/idempotent | P2; draft/submitted/review/interview/offered/accepted/rejected/withdrawn/converted | Assigned admissions staff; applicant self-service only |
 | admission_applicants | id | school_id | application FK; typed applicant role | P2 | Application scope |
 | admission_guardians | id | school_id | application FK; consent/access fields | P2 | Application scope |
