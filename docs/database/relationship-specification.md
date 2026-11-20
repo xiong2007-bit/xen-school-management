@@ -40,7 +40,7 @@
 - `schools 1—N academic_calendars`; calendars may apply to campus/programme/cohort and may overlap. `academic_programmes` are school-scoped and may be referenced by calendars and enrolments.
 - `academic_calendars 1—N academic_years`; each year belongs to one calendar and has calendar-scoped dates/current state. `academic_years 1—N academic_terms`; term overlap is allowed only under the calendar's explicit policy.
 - `academic_calendars 1—N calendar_events`; events may be campus-scoped and public only through publication.
-- `academic_calendars 1—N timetable_periods`; periods use local wall-clock times plus calendar/campus timezone context.
+- `academic_calendars 1—N timetable_periods`; periods use local wall-clock times plus calendar/campus timezone context. `school_rooms` belong to a campus or school scope.
 - `academic_years 1—N timetables`; timetable has versioned entries, each tied to a class-subject offering and optional stream/teacher/room. Entries reference a period and weekday/effective dates. Validate class, teacher and room clashes within the applicable published timetable. Exceptions alter one date without overwriting recurring entries.
 - `schools 1—N grade_levels`; each class references a grade level and year.
 - `academic_years 1—N classes`; `grade_levels 1—N classes`; campus optional.
@@ -73,7 +73,7 @@
 
 - `admission_campaigns 1—N admission_applications`; campaign targets year and optionally grade.
 - `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_application_fee_snapshots, admission_payments`.
-- `admission_campaigns 1—N admission_fee_settings`; settings are the canonical, versioned free/paid/waiver/refund configuration. Each submitted application stores its own fee snapshot; admission payments reference that snapshot and remain distinct from tuition payments. Do not duplicate mutable fee amounts on campaign rows.
+- `admission_campaigns 1—N admission_fee_settings`; settings are the canonical, versioned free/paid/waiver/refund configuration. Each submitted application stores its own fee snapshot; admission payments reference that snapshot and remain distinct from tuition payments. Admission payment refunds reference the original admission payment and enforce refund caps/approval. Do not duplicate mutable fee amounts on campaign rows.
 - `admission_applications 0..1—1 students` after authorised conversion (application's converted_student_id); conversion should be transactional and idempotent.
 - Campaign fee settings and payments reference the campaign/application; admission payment should not be confused with school fee payment.
 
@@ -89,6 +89,7 @@
 - `payments 1—N refunds`; refund approval rows attach to refund.
 - Invoice credit notes/adjustments attach to invoice; no deletion of posted items.
 - Bank account has imports; import has statement entries; reconciliation matches one or more statement entries to payment/journal lines using explicit matching groups where split matches are supported.
+- `currency_definitions` supplies precision; `exchange_rates` retain source, effective time and approval. `currency_conversion_snapshots` preserve source/target amounts, currencies, rate, timestamp, rounding and reason. Cross-currency reconciliation/allocation must reference conversion evidence.
 - Chart accounts form parent/child hierarchy. Accounting period contains journals; journal has lines; line references one account.
 - Expenses reference category, optional supplier/period; category may map to chart account. Purchase request may reference supplier; budget belongs to period and has budget items by account.
 - Financial approvals reference a typed subject; application validates subject exists and tenant matches.
@@ -142,7 +143,7 @@
 - Data export/deletion requests are school-scoped and subject-verified; consent records use typed subject references with application validation.
 - File metadata is central. Domain tables point to files through ordinary FKs. Object key uniqueness and tenant/private access policies are enforced.
 
-## L. Restricted health and safeguarding
+## M. Restricted health and safeguarding
 
 - Student health profiles, conditions, allergies, visits, medication records and administration events are restricted to designated roles; use minimal data and separate access logs.
 - Safeguarding incidents may have referrals and action plans. Each record is restricted; all access, edits and exports are audited. Never expose these records through general student profile, guardian messaging or public website.
