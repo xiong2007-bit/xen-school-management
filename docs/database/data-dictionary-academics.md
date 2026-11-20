@@ -4,11 +4,34 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 
 ## 3. Academic structure
 
+### academic_calendars
+`id, school_id, calendar_code, name, calendar_type, campus_id nullable FK, programme_id nullable, timezone, calendar_status, is_default, effective_from, effective_to nullable, timestamps`. A school may maintain multiple calendars for different campuses, programmes, cohorts or operating patterns. Calendar applicability and default rules must be explicit.
+
 ### academic_years
-`id, school_id, name, start_date, end_date, status, is_current, created_at, updated_at`. Unique name per school; date range valid; at most one current year per school.
+`id, school_id, calendar_id FK academic_calendars, name, start_date, end_date, status, is_current, timestamps`. Unique name per calendar; valid range; at most one current year per calendar. The calendar is the date-structure parent, not merely a label.
 
 ### academic_terms
-`id, school_id, academic_year_id FK, name, term_number, start_date, end_date, status, created_at, updated_at`. Unique term number/year; term dates within year; no overlapping terms unless calendar policy permits.
+`id, school_id, calendar_id FK academic_calendars, academic_year_id FK, name, term_number, start_date, end_date, status, timestamps`. Unique term number/name per year/calendar as configured. Term dates must fit the academic-year policy. Overlap is permitted only when the calendar explicitly allows it; do not enforce a school-wide no-overlap rule.
+
+### calendar_events
+`id, school_id, calendar_id nullable FK academic_calendars, campus_id nullable FK school_campuses, academic_year_id nullable FK, event_type, title, description nullable, starts_on date, ends_on date nullable, is_school_day boolean nullable, visibility, status, created_by uuid, timestamps`. Supports holidays, closures, examinations, school events and trips; public visibility requires publication approval. Dates are date-only facts.
+
+### timetable_periods
+`id, school_id, calendar_id FK, campus_id nullable FK, period_code, name, sequence_number, local_start_time time, local_end_time time, period_type, is_active, timestamps`. Times are local wall-clock values interpreted with the calendar/campus timezone; start must precede end.
+
+### school_rooms
+`id, school_id, campus_id nullable FK, room_code, name, room_type, capacity nullable, accessibility_notes_restricted nullable, room_status, timestamps`. Unique room code within campus/school; room allocation is tenant-scoped.
+
+### timetables
+`id, school_id, calendar_id FK, academic_year_id FK, campus_id nullable FK, timetable_type, version_number, status, effective_from date, effective_to nullable, approved_by uuid nullable, approved_at nullable, published_at nullable, created_by uuid, timestamps`. Versioned draft/review/approved/published/retired schedules; preserve published versions and history.
+
+### timetable_entries
+`id, school_id, timetable_id FK, class_subject_id FK, class_id FK, stream_id nullable FK, teacher_assignment_id nullable FK, room_id nullable FK school_rooms, weekday, period_id FK timetable_periods, valid_from date nullable, valid_to date nullable, entry_status, timestamps`. Entries must agree with class-subject, teacher, calendar, campus and stream scopes. Detect class, teacher and room clashes within effective timetable versions.
+
+### timetable_exceptions
+`id, school_id, timetable_id FK, timetable_entry_id FK, exception_date date, exception_type, replacement_period_id nullable FK, replacement_room_id nullable FK, reason nullable, approved_by uuid nullable, created_at`. Supports cancellations/moved sessions without rewriting recurring entries.
+
+### grade_levels
 
 ### grade_levels
 `id, school_id, code, name, sort_order, education_stage, age_min nullable, age_max nullable, is_active, timestamps`. Unique code; configurable for school context (e.g., Grade, Form, Year).
