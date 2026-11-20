@@ -1,5 +1,16 @@
 # Data Dictionary — School Finance and XEN Billing
 
+## Currency and conversion primitives (cross-cutting)
+
+### currency_definitions
+`currency_code char(3) PK, display_name, minor_unit_exponent, is_active, effective_from, effective_to nullable, source_or_policy_reference nullable, created_at, updated_at`. Currency precision is configurable from an authoritative currency registry/policy; do not assume all currencies have two decimal places.
+
+### exchange_rates
+`id uuid PK, source_currency char(3) FK currency_definitions, target_currency char(3) FK currency_definitions, rate numeric, rate_source, rate_as_of timestamptz, effective_from, effective_to nullable, approval_status, approved_by uuid nullable, created_at`. Rate must be positive; source and target currencies differ; rate source/time and approval policy are recorded.
+
+### currency_conversion_snapshots
+`id uuid PK, school_id FK, source_amount_minor bigint, source_currency char(3), target_amount_minor bigint, target_currency char(3), exchange_rate numeric, exchange_rate_id nullable FK exchange_rates, rate_source, rate_as_of timestamptz, rounding_method, conversion_reason, converted_by uuid, created_at`. Immutable evidence for each conversion; store the actual rate and both amounts so historical values do not depend on later rate changes. Cross-currency allocation or reconciliation requires an explicit conversion snapshot and policy.
+
 This design distinguishes each school's operational finance from XEN's own SaaS subscription billing. Finance tables use explicit currency and integer minor units for amounts (e.g., cents). Each posted transaction is immutable; corrections use reversals, credits or adjustments. Provider callbacks are idempotent. Payment is not considered verified solely because a screenshot/proof file was uploaded.
 
 ## 7. Core school fees (first finance phase)
