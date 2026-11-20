@@ -12,6 +12,7 @@
 6. [Entity relationship specification](relationship-specification.md)
 7. [Constraints, indexes, tenant isolation, RLS, lifecycle and open decisions](constraints-indexes-rls.md)
 8. [Approved design decisions (all 13 accepted)](approved-design-decisions.md)
+9. [Database implementation roadmap](implementation-roadmap.md)
 
 ## Coverage
 
@@ -42,4 +43,4 @@ The specification describes the platform/tenant model; users and roles; students
 
 ## Before implementation
 
-The 13 previously open decisions have been accepted and documented in `approved-design-decisions.md`. Next: prepare the database implementation roadmap, migration sequence, and detailed security/RLS design; validate jurisdiction-specific privacy/retention, payment integrations and operational workflows. Implementation remains unauthorized until separately approved.
+The 13 previously open decisions have been accepted and documented in `approved-design-decisions.md`. The implementation roadmap is available in `implementation-roadmap.md`. Next: review/approve the roadmap, prepare the schema blueprint and migration manifest, validate jurisdiction-specific privacy/retention, payment integrations and operational workflows. Implementation remains unauthorized until separately approved.
