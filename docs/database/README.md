@@ -17,6 +17,7 @@
 11. [Migration manifest and acceptance gates](migration-manifest.md)
 12. [Technical decision register — approved baseline](technical-decision-register.md)
 13. [Technical architecture baseline](technical-architecture-baseline.md)
+14. [Pre-implementation readiness checklist](pre-implementation-readiness-checklist.md)
 
 ## Coverage
 The specification covers platform/tenant model; users, roles and access; students, guardians, verified links, enrolments and staff; academic years, terms, grades, classes, streams, subjects and calendars; attendance; assessments, moderation, results and report cards; admissions; school finance and accounting; website/CMS/domains/translations/forms; parent/student portals and communications; library; transport; document management; support desk; XEN subscriptions/usage; audit/security/consent/exports/deletion/jobs/webhooks/backups; and file metadata.
