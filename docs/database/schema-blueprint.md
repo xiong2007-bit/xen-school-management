@@ -70,7 +70,8 @@ Classify each row and sensitive field. Public website content must never be popu
 | students | id | school_id | unique student number; status and admission/leaving dates | P2; applicant/enrolled/withdrawn/graduated/archived | Staff permission; guardian/student filtered |
 | guardians | id | school_id | optional profile FK; contact validation; unique identifiers only when required | P2 | Relationship-based guardian; staff permissions |
 | guardian_student_links | id | school_id | guardian/student composite FKs; verified state; validity; unique active pair | P2/P3 | Guardian can see only active verified links and per-link flags |
-| guardian_access_restrictions | id | school_id | link/student/guardian; restriction type; order metadata in separate protected file; dates/review | P3; active/reviewed/expired | Legal/privacy designated roles only; access restriction enforced by policy service |
+| guardian_access_restrictions | id | school_id | student/link/person; restriction scope; verified legal-order metadata; dates/review | P3; active/reviewed/expired | Legal/privacy designated roles only; enforced by authorization service |
+| student_emergency_contacts | id | school_id | student; contact priority; verified contact/pick-up scope; validity | P2/P3 | Staff; emergency contact only where necessary |
 | student_enrolments | id | school_id | student/year/calendar/program; primary enrolment rule; dates/status; controlled multiple enrolments | P2; pending/active/paused/transferred/completed/withdrawn | Registrar/admin; guardian limited |
 | staff | id | school_id | unique staff number; optional profile; status | P2/P3 | HR + assigned operational roles |
 | staff_employment | id | school_id | staff, department, supervisor composite FKs; date ranges | P3; draft/active/ended | HR restricted |
@@ -88,7 +89,12 @@ Classify each row and sensitive field. Public website content must never be popu
 | academic_calendars | id | school_id | unique calendar code; campus/program applicability | P1; active/retired | Academic admin |
 | academic_years | id | school_id | calendar FK; valid range; current uniqueness per calendar | P1; planned/open/closed | Academic admin |
 | academic_terms | id | school_id | year/calendar FK; date range; overlap allowed per calendar rules | P1; planned/open/closed | Academic admin |
-| calendar_events/holidays | id | school_id | calendar/campus; date or range; event type | P1 | Academic admin; public only if published |
+| calendar_events/holidays | id | school_id | calendar/campus; date or range; event type; school-day/visibility | P1 | Academic admin; public only if published |
+| timetable_periods | id | school_id | calendar/campus; local start/end; ordered period | P1 | Academic admin |
+| school_rooms | id | school_id | campus/room code/capacity; active state | P1 | Campus/scheduling admins |
+| timetables | id | school_id | year/calendar/campus; version/effective dates/status | P1/P2; draft/approved/published/retired | Academic admin; published view only |
+| timetable_entries | id | school_id | timetable/class-subject/teacher/room/period/day; clash constraints | P2 | Assigned staff and class scope |
+| timetable_exceptions | id | school_id | timetable entry/date; cancellation or move; approval | P2/P3 | Academic admin and affected staff |
 | grade_levels | id | school_id | unique code; stage/sort/age range | P1 | Academic admin |
 | classes | id | school_id | year/grade/campus; unique code per year; capacity | P1 | Class scope |
 | class_streams | id | school_id | class FK; unique code/class; capacity | P1 | Class scope |
@@ -167,7 +173,9 @@ Classify each row and sensitive field. Public website content must never be popu
 | budgets | id | school_id | accounting period; approval state | P1/P2 | Finance |
 | budget_items | id | school_id | budget/account; unique budget/account/currency | P2 | Finance |
 | financial_approvals | id | school_id | subject type/id validated; step; decision append-only | P3 | Approvers; separation of duties |
-| currency_rates/conversions | id | school_id nullable | source/target, rate, effective_at, provider/source, approved_by, original/converted amounts | P2/P3 | Finance; audit |
+| currency_definitions | currency_code | global | ISO code; currency precision/exponent; effective dates | P0/P1 | Platform reference data |
+| exchange_rates | id | global/school policy | source/target, rate, source/time, approval and validity | P2 | Finance admin |
+| currency_conversion_snapshots | id | school_id | original/converted amounts and currencies; rate snapshot; rounding; reason | P2/P3 | Finance; audit |
 
 **Hard separation:** school finance tables above must never FK into XEN platform subscription invoice/payment tables. Integration, if needed, is by explicit external settlement or reporting boundary—not shared ledger IDs. Posted records use reversal/credit/adjustment, never destructive edits.
 
@@ -181,6 +189,8 @@ Classify each row and sensitive field. Public website content must never be popu
 | website_page_versions | id | school_id | page/version unique; immutable snapshot | P1/P0 | Editor; public exact published version only |
 | website_sections | id | school_id | version FK; allow-listed component; position | P1/P0 | Editor; public through approved view |
 | website_components | id | nullable school_id | global/tenant schema allowlist; version | P1 | Platform registry or tenant safe config |
+| website_reusable_blocks | id | nullable school_id | validated reusable block content; version; safe visibility | P1 | Editor; public only via published page snapshot |
+| website_starter_templates | id | none | platform template/version; allowlisted component manifest | P1 | Platform admin; read-only school copy |
 | website_navigation | id | school_id | website; version; validated links | P1/P0 | Editor; published projection |
 | website_media | id | school_id | website/file; consent/rights metadata | P2 until approved; P0 only after explicit approval | Editor; public approved media only |
 | website_articles | id | school_id | website; unique slug/lang; publication status | P0 only published | Editor; public published-only |
@@ -206,7 +216,9 @@ Classify each row and sensitive field. Public website content must never be popu
 | announcement_recipients (recommended) | id | school_id | announcement/user; unique; delivery/read state | P2 | Recipient and authorized comms staff |
 | message_threads | id | school_id | participant set; related student restricted | P2 | Participants only |
 | messages | id | school_id | thread; sender; moderation/edit history | P2 | Thread participant; moderator scoped |
-| message_recipients | id | school_id | thread/user unique active; read state | P2 | Participant only |
+| message_recipients | id | school_id | thread/user unique active; thread-level read state | P2 | Participant only |
+| message_read_receipts | id | school_id | message/recipient unique; read timestamp | P2 | Recipient and authorized thread participants |
+| message_moderation_actions | id | school_id | message/moderator/action/reason/status; append-only | P2/P3 | Moderator scoped; history restricted |
 | message_attachments | id | school_id | message/file; permission validated | P2/P3 | Thread participant; signed downloads |
 | notification_templates | id | nullable school_id | platform or tenant override; version; active | P1 | Template admin |
 | notification_deliveries | id | school_id | recipient/channel/provider; dedupe; retry status | P2 | Recipient; operations sanitized |
@@ -360,27 +372,33 @@ Use separate permission keys and separate RLS policies for SELECT/INSERT/UPDATE/
 13. Domain expert review for finance, legal/custody, health/safeguarding, Zimbabwe and future-market privacy.
 14. Product owner accepts phase scope and pilot validation.
 
-## 11. Unresolved technical decisions (must be reviewed before migrations)
+### L. Restricted health and safeguarding
 
-1. UUID v4 vs v7; key-generation and extension availability.
-2. Supabase project, PostgreSQL version, region, tier, PITR/backups and limitations.
-3. Migration tooling, CI migration identity, schema drift strategy and deployment order.
-4. Trusted tenant-context helper design and auth JWT/session claims; safe RLS for views/functions.
-5. Which global/tenant schema separation approach (schemas vs table groups) and DB roles.
-6. Date/time handling for timetable periods, daylight-saving international schools and calendar overlap semantics.
-7. Currency minor-unit strategy for zero/three-decimal currencies, rounding, rate source and approval.
-8. Payment providers and Zimbabwe-specific collection/reconciliation; verification, callback signature and refund integrations.
-9. Legal/privacy retention, residency, consent and child-data requirements per country.
-10. File storage, scanning/quarantine, encryption/key management, public-media approval, signed URLs.
-11. Exact guardian/legal restriction model and required external legal-order metadata.
-12. Health/safeguarding workflows, roles, data minimization, retention, incident response.
-13. School finance/accounting basis, tax, fiscal-year and journal source mappings.
-14. SaaS plan quotas, usage metering, grace/suspension, promotion redemption and billing currencies.
-15. Public domains, DNS/SSL provider, publish/cache invalidation and public read-model architecture.
-16. Performance targets, largest expected school, reporting/analytics strategy and backup RPO/RTO.
-17. Optional module launch sequence and feature gating.
-18. API permission model, data export, deletion/anonymisation and audit immutability.
-19. Pilot school review of table naming, workflows, grading, finance and admissions.
+| Table group / tables | Key relationship/constraints | Class/lifecycle | RLS intent |
+|---|---|---|---|
+| student_health_profiles, student_health_conditions, student_allergies | student; minimal necessary fields; validity/review; separate sensitivity | P3; active/reviewed/expired | Designated health staff only |
+| health_visits, medication_records, medication_administration_events | student/medication; time; administration event immutable | P3 | Need-to-know; no general parent/profile access |
+| safeguarding_incidents | student optional; incident type/date; restricted narrative; assigned role | P3; reported/assessed/action/closed | Safeguarding designated roles only |
+| safeguarding_referrals, safeguarding_action_plans | incident; referral/plan owner, review and outcome | P3 | Designated case team |
+| restricted_record_access_logs | record/actor/purpose/outcome/time | P3; append-only | Security/privacy reviewer |
+
+## 11. Technical verification items (decisions accepted; evidence still required)
+
+1. Confirm Supabase region/tier, PostgreSQL version/extensions, pooling, Auth settings, backup/PITR and limits.
+2. Confirm local/CI/staging/production environments and migration tooling configuration.
+3. Review tenant-context and RLS helper design, grants and exposed schemas/views/RPC; test fail-closed.
+4. Verify calendar and timetable timezone semantics, recurrence, clash detection, published-version rules and date exceptions.
+5. Validate currency precision registry, conversion snapshots, rounding and source/approval policy.
+6. Select payment providers and verify merchant/API access, callbacks, refunds, settlement and reconciliation.
+7. Complete legal/privacy review: child data, retention, residency, consent, custody/legal restrictions and incident response.
+8. Validate private storage provider, quarantine/scanning, key management, signed access, lifecycle and backup.
+9. Define health/safeguarding roles, record minimums, access audit, retention and case workflows.
+10. Confirm SaaS quotas, billing state transitions, grace/suspension, promotions and provider integrations.
+11. Validate custom domains, DNS/SSL, tenant routing, public read projections and cache invalidation.
+12. Define reporting/analytics performance targets and largest expected tenant; choose read models only as needed.
+13. Confirm optional module rollout gates, feature entitlements and pilot-school validation.
+14. Confirm export/deletion/anonymisation, audit immutability, recovery targets and operational procedures.
+15. Complete the Gate 0 documentation consistency audit and close blockers before executable schema work.
 
 ## 12. Approval boundary
 
