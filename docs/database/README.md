@@ -20,6 +20,7 @@
 14. [Pre-implementation readiness checklist](pre-implementation-readiness-checklist.md)
 15. [Gate 0 scope and consistency audit](gate-0-scope-consistency-audit.md)
 16. [Master requirements traceability matrix (MRTM)](requirements-traceability-matrix.md)
+17. [Proposed first-release/pilot scope](proposed-first-release-scope.md)
 
 ## Coverage
 The specification covers platform/tenant model; users, roles and access; students, guardians, verified links, emergency contacts/legal restrictions, enrolments and staff; academic programmes/calendars/terms/events, classes/subjects, timetable periods/rooms/versioned schedules; attendance; configurable assessment/grading/promotion/report templates; admissions and fee snapshots; school finance, currency conversions and accounting; website builder/reusable blocks/CMS/domains/translations/forms; parent/student portals and communications/read receipts/moderation; library, transport, boarding, meals, clubs, activities and trips; restricted health/safeguarding; documents, service desk; XEN subscriptions/usage; audit/security/consent/exports/deletion/jobs/webhooks/backups; and file metadata. School groups and student portal features are explicitly future/optional.
