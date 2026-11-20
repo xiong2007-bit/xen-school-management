@@ -100,10 +100,10 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 ## 6. Admissions
 
 ### admission_campaigns
-`id, school_id, academic_year_id FK, name, opens_at timestamptz, closes_at timestamptz nullable, target_grade_level_id nullable FK, status, application_fee_required boolean, fee_amount_minor bigint nullable, fee_currency char(3) nullable, fee_refund_policy text nullable, form_schema jsonb, published_at nullable, created_by uuid, timestamps`. Configurable, versioned schema; only collect approved necessary fields.
+`id, school_id, academic_year_id FK, name, opens_at timestamptz, closes_at timestamptz nullable, target_grade_level_id nullable FK, status, form_schema jsonb, form_version, published_at nullable, created_by uuid, timestamps`. Configurable, versioned schema; only collect approved necessary fields. Fee configuration is stored canonically in admission_fee_settings rather than duplicated on the campaign row.
 
 ### admission_applications
-`id, school_id, campaign_id FK, application_reference text, applicant_given_name, applicant_middle_name nullable, applicant_family_name, applicant_date_of_birth date nullable, applicant_grade_level_id nullable FK, applicant_gender nullable, previous_school nullable, application_status, submitted_at nullable, withdrawn_at nullable, converted_student_id uuid nullable FK students, assigned_reviewer_user_id uuid nullable, timestamps`. Unique reference per school; applicant remains separate from student until authorised conversion.
+`id, school_id, campaign_id FK, application_reference text, applicant_given_name, applicant_middle_name nullable, applicant_family_name, applicant_date_of_birth date nullable, applicant_grade_level_id nullable FK, applicant_gender nullable, previous_school nullable, application_status, submitted_at nullable, withdrawn_at nullable, converted_student_id uuid nullable FK students, assigned_reviewer_user_id uuid nullable, fee_snapshot_id nullable FK admission_application_fee_snapshots, timestamps`. Unique reference per school; applicant remains separate from student until authorised conversion. Form version and fee snapshot must be preserved for each submitted application.
 
 ### admission_applicants
 `id, school_id, application_id FK, applicant_type (student/other), name fields, date_of_birth nullable, contact fields nullable, relationship nullable, created_at`. Use where campaign forms support additional applicants; define canonical applicant data mapping carefully.
@@ -127,7 +127,10 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 `id, school_id, application_id FK, old_status nullable, new_status, changed_by uuid, reason nullable, changed_at`. Append-only.
 
 ### admission_fee_settings
-`id, school_id, campaign_id FK, amount_minor bigint, currency char(3), due_rule text, waiver_allowed boolean, refund_rule text, is_active, timestamps`. Amount is campaign application fee, not tuition.
+`id, school_id, campaign_id FK, version_number, fee_required boolean, amount_minor bigint nullable, currency char(3) nullable, due_rule text nullable, waiver_allowed boolean, refund_rule text nullable, effective_from, effective_to nullable, is_active, created_by uuid, timestamps`. This is the single canonical campaign fee configuration; free applications are explicit. Version changes do not alter submitted applications. Application fees are separate from tuition.
+
+### admission_application_fee_snapshots
+`id, school_id, application_id FK, fee_setting_id FK, fee_setting_version, fee_required boolean, amount_minor bigint nullable, currency char(3) nullable, waiver_status, waived_amount_minor nullable, waiver_reason nullable, approved_by uuid nullable, due_at nullable, refund_policy_snapshot nullable, created_at`. Freeze the applicable fee/waiver terms when an application is submitted or fee is assessed; free/waived applications must be distinguishable from unpaid fees.
 
 ### admission_payments
-`id, school_id, application_id FK, fee_setting_id FK, amount_minor bigint, currency char(3), payment_method_id nullable FK payment_methods, provider_reference nullable, verification_status, verified_by uuid nullable, verified_at nullable, paid_at nullable, receipt_reference nullable, created_at, updated_at`. Verify through trusted provider/bank/cash workflow; uploaded proof alone is not proof of settlement.
+`id, school_id, application_id FK, fee_snapshot_id FK, amount_minor bigint, currency char(3), payment_method_code, provider_reference nullable, verification_status, verified_by uuid nullable, verified_at nullable, paid_at nullable, receipt_reference nullable, idempotency_key nullable, created_at, updated_at`. Verify through trusted provider/bank/cash workflow; uploaded proof alone is not proof of settlement. Payment/refund states and reconciliation are auditable.
