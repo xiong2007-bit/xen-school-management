@@ -4,8 +4,11 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 
 ## 3. Academic structure
 
+### academic_programmes
+`id, school_id, programme_code, name, education_stage, description nullable, programme_status, effective_from, effective_to nullable, timestamps`. School-scoped programmes (e.g., national curriculum, Cambridge, IB or specialist tracks) are configurable; programme names/codes are not hardcoded globally.
+
 ### academic_calendars
-`id, school_id, calendar_code, name, calendar_type, campus_id nullable FK, programme_id nullable, timezone, calendar_status, is_default, effective_from, effective_to nullable, timestamps`. A school may maintain multiple calendars for different campuses, programmes, cohorts or operating patterns. Calendar applicability and default rules must be explicit.
+`id, school_id, calendar_code, name, calendar_type, campus_id nullable FK, programme_id nullable FK academic_programmes, timezone, calendar_status, is_default, effective_from, effective_to nullable, timestamps`. A school may maintain multiple calendars for different campuses, programmes, cohorts or operating patterns. Calendar applicability and default rules must be explicit.
 
 ### academic_years
 `id, school_id, calendar_id FK academic_calendars, name, start_date, end_date, status, is_current, timestamps`. Unique name per calendar; valid range; at most one current year per calendar. The calendar is the date-structure parent, not merely a label.
@@ -51,11 +54,23 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 ### student_class_assignments
 `id, school_id, student_enrolment_id FK, class_id FK, stream_id nullable FK, start_date, end_date nullable, assignment_status, assigned_by uuid, timestamps`. Preserve movement history; prevent overlapping active assignment except approved multi-class arrangements.
 
+### assessment_categories
+`id, school_id, category_code, name, category_type, default_weight nullable, is_required boolean, is_active, timestamps`. Categories include tests, coursework, practicals, projects and examinations; weighting is configured per applicable scheme/assessment period.
+
 ### grading_schemes
-`id, school_id, name, description, grade_level_id nullable FK, subject_id nullable FK, academic_year_id nullable FK, calculation_method, pass_mark nullable, is_default, status, timestamps`. Version schemes by year where grading changes.
+`id, school_id, name, description, grade_level_id nullable FK, subject_id nullable FK, academic_year_id nullable FK, calculation_method, pass_mark nullable, ranking_policy nullable, ranking_scope nullable, tie_rule nullable, is_default, status, timestamps`. Scheme changes are versioned; ranking is configurable or disabled by school policy.
+
+### grading_scheme_versions
+`id, school_id, grading_scheme_id FK, version_number, rules_snapshot jsonb, effective_from, effective_to nullable, approved_by uuid nullable, approved_at nullable, created_at`. Snapshot of calculation/weighting/aggregation rules; marks/results reference the effective version for reproducibility.
+
+### promotion_rules
+`id, school_id, academic_year_id FK, from_grade_level_id FK, to_grade_level_id nullable FK, rule_version, rule_config jsonb, approval_status, approved_by uuid nullable, effective_from, effective_to nullable, timestamps`. Configurable promotion/repeat/subject prerequisites; evaluation produces an auditable decision, not automatic destructive enrolment change.
+
+### report_card_templates
+`id, school_id, template_code, name, grade_level_id nullable FK, language_code, template_version, layout_config jsonb, status, approved_by uuid nullable, approved_at nullable, created_at, updated_at`. Validated template/layout snapshot for PDF and digital report cards.
 
 ### grading_scale_items
-`id, school_id, grading_scheme_id FK, label, grade_code, min_percent, max_percent, points nullable, interpretation nullable, sort_order, timestamps`. Non-overlapping inclusive/exclusive boundary design documented; unique code per scheme.
+`id, school_id, grading_scheme_id FK, label, grade_code, min_percent, max_percent, points nullable, interpretation nullable, sort_order, timestamps`. Non-overlapping inclusive/exclusive boundary design documented; unique code per scheme; boundaries tied to a versioned grading scheme.
 
 ## 4. Attendance
 
