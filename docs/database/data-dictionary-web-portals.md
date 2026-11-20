@@ -22,6 +22,12 @@ Tenant tables carry `school_id`; public CMS data is exposed only through safe pu
 ### website_components
 `id, school_id nullable, component_key, component_name, component_schema jsonb, component_version, is_active, created_at`. Platform registry for safe blocks; custom tenant components are config-only.
 
+### website_reusable_blocks
+`id, school_id nullable FK, block_key, name, description nullable, component_schema jsonb, component_version, block_content jsonb, visibility, created_by uuid nullable, timestamps`. Platform blocks are read-only; tenant blocks are validated structured content. Reusable blocks must not contain executable custom code.
+
+### website_starter_templates
+`id uuid PK, template_key, name, description, supported_school_type, template_version, component_manifest jsonb, default_theme jsonb, is_active, created_at, updated_at`. Platform starter kits (primary, secondary, combined, academy, boarding and blank) are versioned and copied into a school's website configuration; templates do not overwrite a customised site.
+
 ### website_navigation
 `id, school_id FK, website_id FK, navigation_name, items jsonb, version, updated_by uuid, updated_at`. Validate links and page references; published version snapshot.
 
@@ -75,11 +81,17 @@ Tenant tables carry `school_id`; public CMS data is exposed only through safe pu
 ### messages
 `id, school_id FK, thread_id FK, sender_user_id FK user_profiles, message_body, sent_at, edited_at nullable, deleted_at nullable, moderation_status, created_at`. Edit/delete actions audited; retention governed.
 
+### message_read_receipts
+`id, school_id FK, message_id FK messages, recipient_user_id FK user_profiles, read_at timestamptz, device_context_safe nullable, created_at`. Unique message/recipient; records per-message read receipt. A recipient's last_read_at remains a thread-level convenience, not a substitute for message receipts.
+
 ### message_recipients
 `id, school_id FK, thread_id FK, user_id FK user_profiles, recipient_role, joined_at, left_at nullable, last_read_at nullable`. Unique active thread/user.
 
 ### message_attachments
 `id, school_id FK, message_id FK, file_id FK files, created_at`. Permission-checked downloads.
+
+### message_moderation_actions
+`id, school_id FK, message_id FK messages, moderator_user_id uuid, action_type, reason nullable, previous_status, new_status, occurred_at`. Append-only moderation history; supports report/review/hide/restore and policy enforcement.
 
 ### notification_templates
 `id, school_id uuid nullable, template_key, channel, language_code, subject_template nullable, body_template, version, is_active, timestamps`. Tenant override allowed only after template validation.
