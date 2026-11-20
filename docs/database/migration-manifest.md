@@ -14,51 +14,34 @@
 
 | Order | Proposed migration group | Contents | Depends on | Verification gate |
 |---:|---|---|---|---|
-| 0001 | conventions-and-required-extensions | UUID strategy, common constraints/helpers only after review, audit conventions, extensions approved | 0000 design freeze | Empty DB boot; extension availability; naming review |
-| 0002 | platform-and-tenants | schools, campuses, platform settings | 0001 | Tenant root integrity; slug uniqueness |
-| 0003 | identity-profiles-memberships | profiles, memberships, identity links | 0002 | Auth identity mapping; membership lifecycle |
-| 0004 | roles-permissions-and-audit | roles, permissions, mappings, platform roles, audit/security events, access grants | 0003 | No self-escalation; audit immutability |
-| 0005 | people-guardian-staff | students, guardians, verified links/restrictions, staff/HR/departments | 0004 | Cross-tenant FK tests; guardian/legal restrictions |
-| 0006 | enrolments-and-calendar | enrolments/history, calendars, years/terms/holidays, grade/class/stream/subjects, teacher/class assignments | 0005 | Flexible calendar; controlled concurrent enrolments |
-| 0007 | attendance | sessions, records, correction history, notifications | 0006 | Duplicate prevention; approval/correction |
-| 0008 | assessment-and-reporting | grading schemes/scales, periods, assessments/components, marks, moderation, results, report cards | 0006; 0007 optional integration | Configurable grading and snapshot reproducibility |
-| 0009 | admissions | campaigns, applications, applicants/guardians, docs/reviews/interviews/offers, fees/payment records, conversion log | 0005; 0006; file metadata foundation (00017 may be split earlier) | Public submission privacy; transition/idempotent conversion |
-| 0010 | school-finance-core | fee config/assignment, invoices/items, payment methods/payments, allocations, receipts | 0005; 0006; admission fee integration optional | Reconciliation, currency, verified-payment invariants |
-| 0011 | websites-and-cms | website/theme/page/version/sections/components/navigation/media/articles/events/domains/translations/publications/SEO/forms/submissions | 0002; 0004; file metadata | Public projection and unpublish/domain checks |
-| 0012 | portals-and-communications | preferences, notifications, access logs/tokens, announcements/recipient records, threads/messages/recipients/attachments, templates/deliveries/preferences/provider logs | 0004; 0005; 0007–0011 as relevant | Recipient permission, attachment privacy, retry/idempotency |
-| 0013 | advanced-finance-accounting | discounts/bursaries/adjustments/credit/refunds, unallocated credit, bank/reconciliation, accounts/periods/journals, expenses/suppliers/purchase/budgets/approvals, conversions | 0010 | Double-entry balancing, approvals, closed periods, immutable postings |
-| 0014 | health-and-safeguarding | restricted health profiles/visits/medications (as approved), incidents, concerns, referrals, plans, attachments/access audit | 0004; 0005; file layer | Need-to-know access and independent privacy/safeguarding review |
-| 0015 | optional-school-services | library, transport, boarding, meals, clubs, activities, trips, permissions, incidents | 0005; 0006; 0007; 0010 integration optional | Each module separately feature-gated and accepted |
-| 0016 | xen-saas-billing | plan catalog/features, billing customer, subscriptions/items, platform invoices/payments/events, usage, promotions/redemptions | 0002; 0004; provider event foundation | Explicitly separate from school finance; idempotent billing |
-| 0017 | files-documents-support-governance | file metadata/version/permissions/access logs, categories, retention, export/deletion requests, support desk, jobs/failures, webhook events, backup/recovery inventory, consent if not earlier | 0004; all modules that reference files (recommend file metadata sub-group earlier before 0009/0011) | Scan/quarantine, permission checks, retention/holds, support privacy |
-| 0018 | localisation-and-region-readiness | translations/catalogs, country-specific config, residency/region metadata, locale and jurisdiction settings | 0002; all configurable modules | Zimbabwe and international locale/date/currency/jurisdiction tests |
+| 0001 | conventions-and-reference-data | UUID/time/money conventions; currency definitions/precision; approved extensions; common audit conventions | 0000 design freeze | Empty DB boot; extension/reference data review |
+| 0002 | platform-and-tenants | schools/tenants, campuses, platform settings | 0001 | Tenant root integrity; slug uniqueness |
+| 0003 | identity-profiles-memberships | profiles, auth identity links, memberships | 0002 | Auth mapping; membership lifecycle |
+| 0004 | roles-permissions-and-audit | roles, permissions, mappings, platform roles, audit/security events, tenant context grants | 0003 | No self-escalation; audit integrity |
+| 0005 | file-metadata-foundation | files/object metadata, privacy class, scan state, storage lifecycle metadata (no provider integration) | 0002–0004 | Tenant/object uniqueness; quarantine state |
+| 0006 | people-guardian-staff | students, guardians, verified links, emergency contacts, legal/custody restrictions, staff/HR/departments | 0004–0005 | Cross-tenant FK; verified guardian; legal restriction tests |
+| 0007 | enrolment-academics-calendar-timetable | controlled enrolments; calendars/years/terms/events; grades/classes/streams/subjects; periods/rooms/timetable versions/entries/exceptions; class history; teacher assignments | 0006 | Calendar overlap rules; concurrent enrolment; timetable clash checks |
+| 0008 | attendance | sessions, records, correction history, notification events | 0007 | Duplicate prevention; correction/audit; period references |
+| 0009 | assessment-and-results | grading schemes/scales/rules, periods, assessments/components, marks, moderation, results, report cards/layout snapshots | 0007; 0008 optional integration | Configurable grading; snapshot reproducibility |
+| 0010 | admissions | campaigns, applications, applicants/guardians, documents, reviews/interviews/offers, canonical fee settings/snapshots/payments, conversion history | 0005–0007; generic payment reference foundation | Public submission privacy; fee snapshot; transition/idempotent conversion |
+| 0011 | school-finance-core | fee categories/structures/items/assignments, payment methods, invoices/items, payments, allocations, receipts | 0006–0007; 0005 | Currency consistency, verified-payment and allocation invariants |
+| 0012 | websites-and-cms | website/theme/page/version/sections/components/reusable blocks/starter templates/navigation/media/articles/events/domains/translations/publications/SEO/forms/submissions | 0002; 0004; 0005 | Public projection, unpublish, verified-domain checks |
+| 0013 | portals-and-communications | preferences, notifications, access logs/tokens, announcements, threads/messages/recipients/read receipts/attachments/moderation, templates/deliveries/preferences/provider logs | 0004–0012 as relevant | Recipient permissions, receipts, moderation, attachment privacy and retries |
+| 0014 | advanced-finance-accounting | discounts/bursaries/adjustments/credit/refunds, unallocated credit, bank/reconciliation, exchange rates/conversion snapshots, accounts/periods/journals, expenses/suppliers/purchase/budgets/approvals | 0011 | Double-entry balancing, FX snapshots, approvals, closed periods |
+| 0015 | health-and-safeguarding | restricted health profiles/conditions/allergies/visits/medications, incidents, concerns, referrals, plans, attachments/access audit | 0004; 0006; 0005 | Need-to-know, legal/privacy and safeguarding review |
+| 0016 | optional-school-services | library, transport, boarding, meals, clubs, activities, trips, permissions, attendance and service incidents | 0006–0008; 0011 integration optional | Capacity, consent, safety and module-specific acceptance |
+| 0017 | xen-saas-billing | plans/features, billing customers, subscriptions/items, platform invoices/payments/events, usage, promotions/redemptions | 0002; 0004; provider event foundation | Separate from school finance; idempotent billing |
+| 0018 | documents-support-governance | document categories/versions/permissions/access logs, retention, export/deletion requests, support desk, jobs/failures, webhook events, backup/recovery inventory, consent | 0004–0017; extends 0005 file foundation | Scan/quarantine, permissions, retention/holds, support privacy |
+| 0019 | localisation-and-region-readiness | translation catalogs, country-specific config, residency/region metadata, locale/jurisdiction settings | 0002; configurable modules | Zimbabwe and international locale/date/currency/jurisdiction tests |
 
-### Dependency refinement
+## Dependency notes
 
-The initial list above must be split/reordered if file metadata is required by admissions, CMS, staff documents or finance receipt attachments. Recommended implementation order for file primitives is to move a small **file-metadata foundation** migration immediately after 0004 (as 0005), then renumber people and subsequent groups. Do not create FKs to an undefined files table. Likewise audit/event primitives should exist before high-risk workflow history. This is an explicit manifest issue to resolve during finalization.
-
-Suggested refined order:
-1. conventions/extensions
-2. platform/tenants
-3. identity/membership
-4. roles/permissions/audit
-5. file metadata + private storage metadata (no storage integration implementation)
-6. people/guardians/staff/legal access
-7. enrolments/calendar/academic structure
-8. attendance
-9. assessment/reporting
-10. admissions
-11. school finance core
-12. websites/CMS
-13. portals/communications
-14. advanced finance/accounting
-15. restricted health/safeguarding
-16. optional school services
-17. XEN SaaS billing
-18. documents/support/governance (extend file foundation; exports/deletion, support, retention, jobs/webhooks)
-19. localisation/region readiness
-
-The refined numbering is the recommended ordering. Final migration IDs may be timestamps or monotonic numbers; the repository roadmap's illustrative prefixes should be reconciled before implementation.
+- File metadata foundation is intentionally moved to 0005, before admissions, staff documents, CMS media and finance attachments that reference files.
+- Currency precision reference data is introduced at 0001; exchange-rate records and immutable conversion snapshots are introduced in advanced finance (0014), while multi-currency fields are supported in core finance.
+- Admission fees use campaign fee settings as the canonical configuration and an application-specific snapshot; payments are admissions-domain records and remain separate from tuition.
+- Academic calendars, timetable periods, rooms, versioned timetables and date exceptions are included in 0007. Published timetable versions must not be overwritten.
+- Restriction/legal access metadata is in the people foundation (0006), with highly restricted document content stored through the file foundation.
+- The table above is the authoritative sequence. No additional renumbering proposal is outstanding.
 
 ## Cross-migration acceptance criteria
 
