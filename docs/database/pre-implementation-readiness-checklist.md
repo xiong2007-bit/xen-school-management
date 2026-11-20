@@ -9,11 +9,11 @@ This checklist tracks readiness before executable database migrations and code a
 - [x] Confirm intended module scope and phased/future modules from Master Plan v3.0.
 - [ ] Finalize exact first-release scope and explicit exclusions (owner prioritization still required).
 - [x] Confirm school types (primary, secondary, combined), Zimbabwe-first market assumptions, role groups and personas from Master Plan v3.0.
-- [ ] Assign unique requirement IDs and acceptance criteria to all requirements (not yet completed).
+- [x] Draft unique requirement IDs and acceptance criteria in the [Master Requirements Traceability Matrix](requirements-traceability-matrix.md) (owner review and stakeholder validation pending).
 - [x] Define change-control principle for scope and architecture amendments in the approved technical baseline.
 - [x] Confirm Master Plan v3.0 glossary and key terminology; extend as implementation-specific terms are added.
 
-**Evidence:** Master Plan v3.0, [Gate 0 audit report](gate-0-scope-consistency-audit.md), approved decisions, architecture baseline. **Gate 0 status: PASS WITH ACTIONS** (first-release scope and requirement-ID assignment remain open).
+**Evidence:** Master Plan v3.0, [Gate 0 audit report](gate-0-scope-consistency-audit.md), approved decisions, architecture baseline and [requirements traceability matrix](requirements-traceability-matrix.md). **Gate 0 status: PASS WITH ACTIONS** (first-release scope, owner validation and stakeholder acceptance remain open).
 
 ## Gate 1 — Architecture and environment verification
 - [ ] Verify selected Supabase PostgreSQL version, extensions, region, tier, connection pooling, API exposure, Auth settings and backup capabilities.
