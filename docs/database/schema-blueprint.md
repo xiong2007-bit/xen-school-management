@@ -86,7 +86,8 @@ Classify each row and sensitive field. Public website content must never be popu
 
 | Table | PK | Tenant key | Key FKs / constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|---|
-| academic_calendars | id | school_id | unique calendar code; campus/program applicability | P1; active/retired | Academic admin |
+| academic_programmes | id | school_id | unique programme code; stage and effective dates | P1 | Academic admin |
+| academic_calendars | id | school_id | unique calendar code; campus/program applicability; timezone | P1; active/retired | Academic admin |
 | academic_years | id | school_id | calendar FK; valid range; current uniqueness per calendar | P1; planned/open/closed | Academic admin |
 | academic_terms | id | school_id | year/calendar FK; date range; overlap allowed per calendar rules | P1; planned/open/closed | Academic admin |
 | calendar_events/holidays | id | school_id | calendar/campus; date or range; event type; school-day/visibility | P1 | Academic admin; public only if published |
@@ -101,7 +102,11 @@ Classify each row and sensitive field. Public website content must never be popu
 | subjects | id | school_id | unique code; active | P1 | Academic admin |
 | class_subjects | id | school_id | class/subject/year/stream; unique teaching offering | P1/P2 | Teacher/class scope |
 | student_class_assignments | id | school_id | enrolment/class/stream; valid period; prevent conflicting active assignments | P2; active/ended | Class staff and registrar |
-| grading_schemes | id | school_id | optional grade/subject/year; calculation version; default uniqueness | P1 | Academic admin |
+| assessment_categories | id | school_id | configurable category and weighting | P1 | Academic admin |
+| grading_schemes | id | school_id | grade/subject/year scope; ranking policy; default uniqueness | P1 | Academic admin |
+| grading_scheme_versions | id | school_id | scheme/version; effective dates; immutable rules snapshot | P1/P2 | Academic admin; approved snapshot |
+| promotion_rules | id | school_id | year/from/to grade; versioned criteria; approval | P2 | Academic admin/approver |
+| report_card_templates | id | school_id | validated layout config; version and approval | P1/P2 | Academic admin/editor |
 | grading_scale_items | id | school_id | scheme FK; boundary range/no overlaps; code unique | P1 | Academic admin |
 | assessment_periods | id | school_id | year/term/calendar; valid dates | P1 | Academic admin |
 | assessments | id | school_id | period/class_subject/scheme; max score >0; weights rules | P2; draft/open/submitted/moderated/approved/published/archived | Teacher assignment; approval workflow |
@@ -134,7 +139,9 @@ Classify each row and sensitive field. Public website content must never be popu
 | admission_interviews | id | school_id | application/staff; schedule/status; restricted notes | P2 | Admissions/interviewer |
 | admission_offers | id | school_id | application; offer ref; expiry/decision; one active offer rule | P2 | Admissions |
 | admission_status_history | id | school_id | application; from/to, actor, reason, occurred_at | P2/P3 | Admissions; append-only |
-| admission_fee_payments | id | school_id | application/campaign; currency/amount; provider idempotency; verified before acceptance | P2 | Bursar/admissions split permissions |
+| admission_fee_settings | id | school_id | campaign/version; fee-required, amount/currency, waiver/refund, effective dates | P1 | Admissions/bursar split permissions |
+| admission_application_fee_snapshots | id | school_id | application; fee config/version and assessed terms; waiver/amount snapshot | P2 | Admissions/bursar |
+| admission_payments | id | school_id | application/fee snapshot; amount/currency; idempotency; verified | P2 | Bursar/admissions split permissions |
 | admissions_conversion_log | id | school_id | application/student/enrolment; unique conversion key | P2 | Registrar/admin; append-only |
 
 ### F. School finance (distinct ledger domain)
@@ -189,6 +196,8 @@ Classify each row and sensitive field. Public website content must never be popu
 | website_page_versions | id | school_id | page/version unique; immutable snapshot | P1/P0 | Editor; public exact published version only |
 | website_sections | id | school_id | version FK; allow-listed component; position | P1/P0 | Editor; public through approved view |
 | website_components | id | nullable school_id | global/tenant schema allowlist; version | P1 | Platform registry or tenant safe config |
+| website_reusable_blocks | id | nullable school_id | validated reusable structured content; version | P1 | Editor; public only published snapshot |
+| website_starter_templates | id | none | versioned platform component manifest; copied to tenant | P1 | Platform admin; read-only school copy |
 | website_reusable_blocks | id | nullable school_id | validated reusable block content; version; safe visibility | P1 | Editor; public only via published page snapshot |
 | website_starter_templates | id | none | platform template/version; allowlisted component manifest | P1 | Platform admin; read-only school copy |
 | website_navigation | id | school_id | website; version; validated links | P1/P0 | Editor; published projection |
