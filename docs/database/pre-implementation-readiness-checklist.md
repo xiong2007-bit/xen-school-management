@@ -7,7 +7,7 @@ This checklist tracks readiness before executable database migrations and code a
 ## Gate 0 — Project and scope freeze
 - [x] Confirm master plan v3.0 is authoritative and the data dictionary, relationship specification, constraints/RLS, schema blueprint, migration manifest and 13 approved design decisions were cross-checked against it (Gate 0 audit report).
 - [x] Confirm intended module scope and phased/future modules from Master Plan v3.0.
-- [ ] Finalize exact first-release scope and explicit exclusions (owner prioritization still required).
+- [ ] Review and approve the [proposed first-release scope](proposed-first-release-scope.md), including exclusions and pilot acceptance scenarios (owner prioritization still required).
 - [x] Confirm school types (primary, secondary, combined), Zimbabwe-first market assumptions, role groups and personas from Master Plan v3.0.
 - [x] Draft unique requirement IDs and acceptance criteria in the [Master Requirements Traceability Matrix](requirements-traceability-matrix.md) (owner review and stakeholder validation pending).
 - [x] Define change-control principle for scope and architecture amendments in the approved technical baseline.
