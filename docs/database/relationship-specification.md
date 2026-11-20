@@ -73,9 +73,9 @@
 
 - `admission_campaigns 1—N admission_applications`; campaign targets year and optionally grade.
 - `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_application_fee_snapshots, admission_payments`.
-- `admission_campaigns 1—N admission_fee_settings`; settings are the canonical, versioned free/paid/waiver/refund configuration. Each submitted application stores its own fee snapshot; admission payments reference that snapshot and remain distinct from tuition payments. Admission payment refunds reference the original admission payment and enforce refund caps/approval. Do not duplicate mutable fee amounts on campaign rows.
+- `admission_campaigns 1—N admission_fee_settings`; settings are the canonical, versioned free/paid/waiver/refund configuration. Each submitted application stores its own fee snapshot; admission payments reference that snapshot and remain distinct from tuition payments. Admission payments have refund records referencing the original payment with caps/approval. Do not duplicate mutable fee amounts on campaign rows.
 - `admission_applications 0..1—1 students` after authorised conversion (application's converted_student_id); conversion should be transactional and idempotent.
-- Campaign fee settings and payments reference the campaign/application; admission payment should not be confused with school fee payment.
+
 
 ## G. School finance
 
@@ -89,7 +89,6 @@
 - `payments 1—N refunds`; refund approval rows attach to refund.
 - Invoice credit notes/adjustments attach to invoice; no deletion of posted items.
 - Bank account has imports; import has statement entries; reconciliation matches one or more statement entries to payment/journal lines using explicit matching groups where split matches are supported.
-- Currency definitions supply precision; exchange-rate records retain source, effective time and approval. Conversion snapshots preserve source/target amounts, currencies, rate, timestamp, rounding and reason. Cross-currency reconciliation/allocation requires explicit conversion evidence.
 - `currency_definitions` supplies precision; `exchange_rates` retain source, effective time and approval. `currency_conversion_snapshots` preserve source/target amounts, currencies, rate, timestamp, rounding and reason. Cross-currency reconciliation/allocation must reference conversion evidence.
 - Chart accounts form parent/child hierarchy. Accounting period contains journals; journal has lines; line references one account.
 - Expenses reference category, optional supplier/period; category may map to chart account. Purchase request may reference supplier; budget belongs to period and has budget items by account.
