@@ -72,7 +72,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | students | id | school_id | unique student number; status and admission/leaving dates | P2; applicant/enrolled/withdrawn/graduated/archived | Staff permission; guardian/student filtered |
 | guardians | id | school_id | optional profile FK; contact validation; unique identifiers only when required | P2 | Relationship-based guardian; staff permissions |
 | guardian_student_links | id | school_id | guardian/student composite FKs; verified state; validity; unique active pair | P2/P3 | Guardian can see only active verified links and per-link flags |
-| guardian_access_restrictions | id | school_id | student/link/person; restriction scope; verified legal-order metadata; dates/review | P3; active/reviewed/expired | Legal/privacy designated roles only; enforced by authorization service |
+| guardian_access_restrictions | id | school_id | student/guardian/link target; restriction scope; verified legal-order metadata; dates/review | P3; active/reviewed/expired | Legal/privacy designated roles only; enforced by authorization service |
 | student_emergency_contacts | id | school_id | student; contact priority; verified contact/pick-up scope; validity | P2/P3 | Staff; emergency contact only where necessary |
 | student_enrolments | id | school_id | student/year/calendar/program; primary enrolment rule; dates/status; controlled multiple enrolments | P2; pending/active/paused/transferred/completed/withdrawn | Registrar/admin; guardian limited |
 | staff | id | school_id | unique staff number; optional profile; status | P2/P3 | HR + assigned operational roles |
