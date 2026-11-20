@@ -13,6 +13,7 @@
 
 ## A. Platform and tenancy
 
+- Future optional `school_groups 1—N school_group_memberships`; membership connects group to school tenant. Group-level grants remain scoped and do not override tenant RLS.
 - `schools 1—N school_campuses` (campus belongs to exactly one tenant).
 - `auth.users 1—0..1 user_profiles` (profile keyed by auth user ID).
 - `user_profiles 1—N school_memberships`; `schools 1—N school_memberships`. Unique active school/user membership.
