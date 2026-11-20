@@ -36,7 +36,7 @@
 
 ## C. Academics
 
-- `schools 1—N academic_calendars`; calendars may apply to campus/programme/cohort and may overlap.
+- `schools 1—N academic_calendars`; calendars may apply to campus/programme/cohort and may overlap. `academic_programmes` are school-scoped and may be referenced by calendars and enrolments.
 - `academic_calendars 1—N academic_years`; each year belongs to one calendar and has calendar-scoped dates/current state. `academic_years 1—N academic_terms`; term overlap is allowed only under the calendar's explicit policy.
 - `academic_calendars 1—N calendar_events`; events may be campus-scoped and public only through publication.
 - `academic_calendars 1—N timetable_periods`; periods use local wall-clock times plus calendar/campus timezone context.
@@ -72,6 +72,7 @@
 
 - `admission_campaigns 1—N admission_applications`; campaign targets year and optionally grade.
 - `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_application_fee_snapshots, admission_payments`.
+- `admission_campaigns 1—N admission_fee_settings`; settings are canonical and versioned. Each submitted application stores its own fee snapshot. Admission payments reference that snapshot and remain distinct from tuition payments.
 - `admission_campaigns 1—N admission_fee_settings`; fee settings are the canonical, versioned free/paid/waiver/refund configuration. Applications freeze the applicable fee snapshot; payments reference that snapshot. Never duplicate mutable fee amounts on campaign rows or tuition invoices.
 - `admission_applications 0..1—1 students` after authorised conversion (application's converted_student_id); conversion should be transactional and idempotent.
 - Campaign fee settings and payments reference the campaign/application; admission payment should not be confused with school fee payment.
@@ -97,7 +98,7 @@
 - `school_websites 1—N website_pages`; page can have parent page for hierarchy.
 - `website_pages 1—N website_page_versions`; version is immutable content snapshot.
 - `website_page_versions 1—N website_sections`; section records ordered component and validated props.
-- `website_components` supplies allow-listed component schema.
+- `website_components` supplies allow-listed component schema; `website_reusable_blocks` store validated reusable content and `website_starter_templates` are versioned platform kits copied into tenant websites.
 - `website_pages 1—N website_publications`; publication event references exact page version.
 - `school_websites 1—N website_domains` (correct canonical table is `school_websites 1—N website_domains`). One verified primary domain per website; domains globally unique after normalisation.
 - Website media references files; articles/events/forms belong to website. Article featured media optional.
