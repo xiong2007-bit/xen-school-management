@@ -1,6 +1,6 @@
 # Database Implementation Roadmap — XEN SCHOOL MANAGEMENT v3.0
 
-**Status:** Roadmap for review; implementation not started.
+**Status:** Approved product/design baseline; Gate 0 consistency audit underway; implementation not started.
 **Baseline:** Complete Combined Master Plan v3.0, database dictionary, relationship specification, constraints/indexes/RLS specification and all 13 approved design decisions.
 **Approval boundary:** This roadmap describes order, scope, dependencies, validation and release gates. It does not authorize SQL, application code, deployment, production data or credentials.
 
@@ -58,9 +58,9 @@
 **Exit gate:** enrolment, guardian relationship and staff access workflows pass.
 
 ### Phase 3 — Academic structure and flexible calendar
-**Entities:** academic calendars/years, terms, grade levels, classes, streams, subjects, class-subject mappings, student class assignment history.
-**Sequence:** calendar model → years/terms → grade/class/stream → subject catalog → assignments → class history and promotion/transfer rules.
-**Tests:** multiple calendars; overlapping terms where allowed; time-zone/date boundaries; valid campus scope; controlled enrolment rules; historic class records.
+**Entities:** multiple academic calendars/years/terms, calendar events/holidays, grade levels, classes, streams, subjects, class-subject mappings, periods, rooms, versioned timetables/entries/exceptions, student class assignment history.
+**Sequence:** calendar model and overlap policy → years/terms/events → grade/class/stream → subject catalog and teacher assignments → periods/rooms → timetable versions/entries/clash validation/exceptions → class history and promotion/transfer rules.
+**Tests:** multiple calendars; calendar/campus/programme applicability; overlapping terms where allowed; time-zone/date boundaries; controlled enrolment rules and primary scope; timetable class/teacher/room clash detection, versioning and exception dates; historic class records.
 **Exit gate:** schools can configure academic structures without bespoke schema changes.
 
 ### Phase 4 — Attendance
