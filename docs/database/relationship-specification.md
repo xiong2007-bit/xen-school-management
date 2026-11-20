@@ -92,7 +92,7 @@
 - `website_page_versions 1—N website_sections`; section records ordered component and validated props.
 - `website_components` supplies allow-listed component schema.
 - `website_pages 1—N website_publications`; publication event references exact page version.
-- `website_websites 1—N website_domains` (correct canonical table is `school_websites 1—N website_domains`). One verified primary domain per website; domains globally unique after normalisation.
+- `school_websites 1—N website_domains` (correct canonical table is `school_websites 1—N website_domains`). One verified primary domain per website; domains globally unique after normalisation.
 - Website media references files; articles/events/forms belong to website. Article featured media optional.
 - Translations reference the source page identity and target locale; publishing references approved translation/version.
 - Navigation, SEO and form schemas are website-scoped configuration; submissions are tenant data and may contain sensitive information.
