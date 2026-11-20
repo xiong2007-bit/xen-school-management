@@ -38,12 +38,16 @@ A conventional FK on `id` does not alone prove that two tenant rows share the sa
 Create indexes on all FK columns and common tenant-scoped filter/sort paths. Use composite indexes starting with school_id for tenant queries.
 
 ### Tenant/identity
+- guardian links: `(school_id,student_id,guardian_id,status,valid_from,valid_to)`; restrictions: `(school_id,student_id,status,effective_from,effective_to)`, `(school_id,guardian_student_link_id,status)`; emergency contacts by student/validity.
 - memberships: `(school_id,user_id,status)`, `(user_id,status)`.
 - role assignments: `(school_membership_id,valid_from,valid_until)`; role permissions by role_id.
 - campuses, staff, students: `(school_id,status)`, unique identifiers.
 
 ### Academics
-- academic years: `(school_id,start_date,end_date)`; terms: `(school_id,academic_year_id,start_date)`.
+- calendars: `(school_id,calendar_code)`, `(school_id,campus_id,programme_id,status)`; academic years: `(school_id,calendar_id,start_date,end_date)`; terms: `(school_id,calendar_id,academic_year_id,start_date)`.
+- calendar events: `(school_id,calendar_id,starts_on,ends_on)` and campus/date.
+- timetable periods: `(school_id,calendar_id,campus_id,sequence_number)`; rooms by campus/code.
+- timetables: `(school_id,academic_year_id,campus_id,status,version_number)`; entries: `(school_id,timetable_id,weekday,period_id)`, `(school_id,class_id,weekday,period_id)`, teacher/room conflict indexes; exceptions by timetable/date.
 - classes: `(school_id,academic_year_id,grade_level_id)`; streams by class.
 - enrolments: `(school_id,student_id,academic_year_id,status)`, `(school_id,student_id,is_primary,status)`, programme/year and valid-date indexes; avoid a unique student/year index that blocks approved concurrent enrolments.
 - class assignments: `(school_id,class_id,start_date,end_date)`, `(school_id,student_enrolment_id)`.
