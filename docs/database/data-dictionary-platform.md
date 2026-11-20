@@ -7,6 +7,14 @@ Unless stated otherwise, tables use `id uuid primary key default gen_random_uuid
 
 ## 1. Platform and school tenancy
 
+### school_groups (future capability)
+- `id uuid PK, name, group_code, status, created_at, updated_at`.
+Optional organisation above multiple school tenants; planned for later phase and not required for initial pilot. Group membership never collapses school tenant boundaries.
+
+### school_group_memberships (future capability)
+- `id uuid PK, school_group_id FK school_groups, school_id FK schools, membership_status, valid_from, valid_to nullable, created_at`.
+Unique active group/school; a school may belong to a group only under explicitly approved rules. Group-level permissions are scoped grants and never imply unrestricted cross-tenant access.
+
 ### schools
 - `id uuid PK`: tenant identity.
 - `legal_name text NOT NULL`: registered/legal name.
