@@ -24,6 +24,11 @@ A conventional FK on `id` does not alone prove that two tenant rows share the sa
 - Journal: debits equal credits per currency; only posted entries are immutable; posting restricted to open period.
 - Website: unique page slug per website/language; publication points to version; domain verified before routing; component schema allow-list.
 - Files: object key unique; size > 0; file status and scan status required; public privacy classification requires approval.
+- Timetable: published timetable versions are immutable snapshots; entries validate period/calendar scope and prevent class, teacher and room conflicts. Exceptions are dated and auditable.
+- Guardian restrictions: verified legal/custody restrictions override ordinary guardian-link permissions; emergency contact/pick-up authority does not grant portal access.
+- Currency conversion: conversion evidence retains both amounts/currencies, rate/source/time, rounding and reason; no implicit cross-currency sums or allocations.
+- Messaging: per-message read receipts are unique per recipient; moderation history is append-only and restricted.
+- Optional services: dated boarding/route/activity/trip assignments validate capacity, eligibility, consent and guardian legal authority.
 - Messages: thread participants authorise access; internal support notes excluded from requester view.
 - Transport: route-stop sequence unique; assignment stop must belong to route; student assignment valid for period.
 - Subscription: contract snapshots price/plan; event history; usage dedupe key unique.
