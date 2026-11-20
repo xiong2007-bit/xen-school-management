@@ -9,12 +9,12 @@ A conventional FK on `id` does not alone prove that two tenant rows share the sa
 - School slug globally unique; domain name globally unique after normalisation.
 - School-local codes unique: campus, student number, staff number, grade, class, stream, subject, category, fee, invoice, receipt, admission reference, ticket, transport route, book accession and supplier code.
 - Membership: one active school/user membership.
-- Guardian link: no duplicate active guardian/student relationship; verify permitted legal authority and portal flags.
-- Academic year: valid date range; at most one current year. Terms are within year and not overlapping unless calendar design explicitly allows.
+- Guardian link: no duplicate active guardian/student relationship; verification and per-link permissions apply. Emergency-contact authority and legal/custody restrictions are separate records and override ordinary relationship access.
+- Calendar/year/term: valid ranges; current year uniqueness per calendar; terms may overlap only under explicit calendar policy. Validate timetable periods, class/teacher/room conflicts, effective dates and published-version integrity.
 - Class and stream capacity nonnegative; active enrolment/class assignments cannot exceed capacity unless an override is recorded.
-- Enrolment: unique student/year unless repeat/transfer policy explicitly permits multiple episodes.
+- Enrolment: allow multiple concurrent enrolments only for approved programme/grade combinations; define primary enrolment per applicable scope; prevent conflicting active assignments and preserve history. Do not impose a blanket student/year uniqueness rule.
 - Attendance: unique session/student; student must be eligible for class on date.
-- Assessment: scores within maximum; assessment period, class subject and student must be in same school and eligible cohort. Component weights and totals validated.
+- Assessment: scores within maximum; assessment period, class subject and student must be in same school and eligible cohort. Versioned grading/weighting/aggregation/ranking/promotion/report-layout rules; component weights and totals validated.
 - Report cards: unique enrolment/year/term/type; published artifacts are snapshots.
 - Admissions: unique application reference; conversion creates/links one student idempotently; application statuses transition via workflow.
 - Invoice: unique invoice number; amounts reconcile to line totals and discount/tax; single currency; posted invoices immutable.
@@ -40,7 +40,7 @@ Create indexes on all FK columns and common tenant-scoped filter/sort paths. Use
 ### Academics
 - academic years: `(school_id,start_date,end_date)`; terms: `(school_id,academic_year_id,start_date)`.
 - classes: `(school_id,academic_year_id,grade_level_id)`; streams by class.
-- enrolments: `(school_id,academic_year_id,grade_level_id,status)`, `(school_id,student_id)`.
+- enrolments: `(school_id,student_id,academic_year_id,status)`, `(school_id,student_id,is_primary,status)`, programme/year and valid-date indexes; avoid a unique student/year index that blocks approved concurrent enrolments.
 - class assignments: `(school_id,class_id,start_date,end_date)`, `(school_id,student_enrolment_id)`.
 
 ### Attendance and results
