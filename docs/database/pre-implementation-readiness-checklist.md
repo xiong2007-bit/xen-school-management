@@ -1,18 +1,19 @@
 # Pre-Implementation Readiness Checklist — XEN SCHOOL MANAGEMENT v3.0
 
-**Status:** Planning checklist. Architecture baseline approved; gates are not yet verified. No implementation authorization is implied.
+**Status:** Gate 0 audit completed with actions; architecture baseline approved; Gates 1–7 verification evidence pending. No implementation authorization is implied.
 
 This checklist tracks readiness before executable database migrations and code are created. Items are marked `[ ]` until evidence is reviewed and accepted.
 
 ## Gate 0 — Project and scope freeze
-- [ ] Confirm master plan v3.0, data dictionary, relationship specification, constraints/RLS, schema blueprint, migration manifest and 13 approved design decisions are the current source of truth.
-- [ ] Confirm all intended modules, first release scope, explicit exclusions and phased modules.
-- [ ] Confirm school types, Zimbabwe pilot assumptions, user roles and personas.
-- [ ] Confirm product requirements have unique IDs and acceptance criteria.
-- [ ] Define change-control procedure for scope and architecture amendments.
-- [ ] Establish glossary for school, campus, term/calendar, enrolment, guardian, learner, invoice, receipt and other domain terms.
+- [x] Confirm master plan v3.0 is authoritative and the data dictionary, relationship specification, constraints/RLS, schema blueprint, migration manifest and 13 approved design decisions were cross-checked against it (Gate 0 audit report).
+- [x] Confirm intended module scope and phased/future modules from Master Plan v3.0.
+- [ ] Finalize exact first-release scope and explicit exclusions (owner prioritization still required).
+- [x] Confirm school types (primary, secondary, combined), Zimbabwe-first market assumptions, role groups and personas from Master Plan v3.0.
+- [ ] Assign unique requirement IDs and acceptance criteria to all requirements (not yet completed).
+- [x] Define change-control principle for scope and architecture amendments in the approved technical baseline.
+- [x] Confirm Master Plan v3.0 glossary and key terminology; extend as implementation-specific terms are added.
 
-**Evidence:** approved scope, requirements list, change log.
+**Evidence:** Master Plan v3.0, [Gate 0 audit report](gate-0-scope-consistency-audit.md), approved decisions, architecture baseline. **Gate 0 status: PASS WITH ACTIONS** (first-release scope and requirement-ID assignment remain open).
 
 ## Gate 1 — Architecture and environment verification
 - [ ] Verify selected Supabase PostgreSQL version, extensions, region, tier, connection pooling, API exposure, Auth settings and backup capabilities.
