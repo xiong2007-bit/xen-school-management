@@ -75,7 +75,7 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 ## 4. Attendance
 
 ### attendance_sessions
-`id, school_id, academic_year_id FK, term_id nullable FK, class_id FK, stream_id nullable FK, session_date date, session_type text (daily/period/event), period_id nullable uuid, recorded_by uuid FK user_profiles, status (draft/submitted/approved/locked), submitted_at, approved_by uuid nullable, approved_at nullable, notes nullable, timestamps`. Unique class/date/type/period/stream as applicable.
+`id, school_id, academic_year_id FK, term_id nullable FK, class_id FK, stream_id nullable FK, session_date date, session_type text (daily/period/event), period_id nullable FK timetable_periods, recorded_by uuid FK user_profiles, status (draft/submitted/approved/locked), submitted_at, approved_by uuid nullable, approved_at nullable, notes nullable, timestamps`. Unique class/date/type/period/stream as applicable.
 
 ### attendance_records
 `id, school_id, session_id FK, student_id FK, attendance_status text (present/absent/late/excused/partial/other), arrival_time timestamptz nullable, minutes_late integer nullable, reason_code nullable, note nullable, recorded_by uuid, updated_by uuid nullable, timestamps`. Unique session/student. Validate late minutes and state; restricted notes.
@@ -148,4 +148,7 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 `id, school_id, application_id FK, fee_setting_id FK, fee_setting_version, fee_required boolean, amount_minor bigint nullable, currency char(3) nullable, waiver_status, waived_amount_minor nullable, waiver_reason nullable, approved_by uuid nullable, due_at nullable, refund_policy_snapshot nullable, created_at`. Freeze the applicable fee/waiver terms when an application is submitted or fee is assessed; free/waived applications must be distinguishable from unpaid fees.
 
 ### admission_payments
+
+### admission_payment_refunds
+`id, school_id FK, admission_payment_id FK, refund_reference, amount_minor bigint, currency char(3), refund_status, reason, requested_by uuid, approved_by uuid nullable, processed_at nullable, provider_reference nullable, created_at, updated_at`. Refunds reference original admission payments, cannot exceed verified paid amount net of previous refunds, and require policy-based approval/audit.
 `id, school_id, application_id FK, fee_snapshot_id FK, amount_minor bigint, currency char(3), payment_method_code, provider_reference nullable, verification_status, verified_by uuid nullable, verified_at nullable, paid_at nullable, receipt_reference nullable, idempotency_key nullable, created_at, updated_at`. Verify through trusted provider/bank/cash workflow; uploaded proof alone is not proof of settlement. Payment/refund states and reconciliation are auditable.
