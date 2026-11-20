@@ -1,100 +1,130 @@
-# Technical Decision Register — XEN SCHOOL MANAGEMENT v3.0
+# Technical Architecture Baseline — XEN SCHOOL MANAGEMENT v3.0
 
-**Status:** Owner-approved baseline (20 November 2026). This approval accepts the recommended defaults as the project's architecture direction. Implementation remains separately gated; any provider-dependent, legal, operational, or security detail listed as a pre-implementation verification item must be resolved before production.
+**Status:** Owner-approved architecture baseline (20 November 2026). This is a planning document. Provider, legal, operational and security verification gates remain open; implementation is not yet authorized.
 
-## Approval record
-The owner approved the recommendations in this register as a whole. Approved baseline choices are not to be silently changed; material changes require an amendment with rationale, impact, and approval. Acceptance of the direction does not imply provider capability, legal compliance, or readiness to deploy.
+## 1. Purpose
+This document records the agreed architecture direction for XEN SCHOOL MANAGEMENT v3.0. It translates approved product/design decisions and the Technical Decision Register into a baseline for detailed design and migration readiness.
 
-## Decision summary
+## 2. Architecture overview
 
-| ID | Topic | Approved baseline | Status / remaining verification |
-|---|---|---|---|
-| TDR-01 | Database platform | Supabase-managed PostgreSQL | Approved; confirm version/features at setup |
-| TDR-02 | Region/tier | Select by latency, privacy, budget, availability, backups and recovery | Approved criteria; final region/tier must be verified |
-| TDR-03 | Schema organization | Domain schemas with controlled exposure; restricted schemas not browser/anonymous exposed | Approved |
-| TDR-04 | Auth | Supabase Auth linked by UUID; no credentials replicated | Approved |
-| TDR-05 | API access | API-first Cloudflare Workers for sensitive/core workflows; direct access only explicitly reviewed; RLS mandatory | Approved |
-| TDR-06 | Migration tooling | Supabase CLI migrations in Git; reviewed and tested | Approved |
-| TDR-07 | IDs | UUIDv4 initially | Approved; reconsider UUIDv7 only with documented case |
-| TDR-08 | Tenant context | Derive active tenant membership from authenticated subject; do not trust client tenant/role claims alone | Approved |
-| TDR-09 | RLS helpers | Safe search_path, least privilege, fail closed, SECURITY DEFINER avoided unless justified and reviewed | Approved |
-| TDR-10 | Time/date | timestamptz for instants, date for calendar facts, IANA timezone context; UTC storage | Approved |
-| TDR-11 | Currency/money | Currency code + integer minor units and currency precision registry; explicit conversion snapshots | Approved |
-| TDR-12 | Finance ledger | Separate school finance and XEN SaaS billing domains; immutable posted entries and reversals | Approved |
-| TDR-13 | File storage | Private Cloudflare R2 as baseline candidate; secure upload, quarantine/scan, short-lived authorized access | Approved direction; validate cost, features and backup |
-| TDR-14 | CMS publishing | Private authoring and explicit approved publication versions/projection; safe anonymous reads only | Approved |
-| TDR-15 | Payments | Provider-neutral adapters, server-side verification, idempotency and reconciliation | Approved design; provider selection/sandbox verification pending |
-| TDR-16 | Privacy/retention | Data inventory, jurisdiction-specific retention, legal holds, export/deletion and incident process | Approved approach; legal durations/review pending |
-| TDR-17 | Backups/recovery | Managed backup/PITR where available, independent encrypted backup and restore drills; define RPO/RTO | Approved approach; service targets and tier pending |
-| TDR-18 | Testing/CI | Migration replay, realistic RLS roles, tenant-isolation, finance, privacy, files and API tests | Approved |
-| TDR-19 | Deployment split | React+TypeScript frontend on Vercel; Cloudflare Workers API; Supabase DB/Auth; R2 baseline candidate; GitHub | Approved baseline; operational fit/free-tier constraints verify |
-| TDR-20 | Secrets | Managed server-side secrets; never in frontend/Git; rotation and access audit | Approved |
-| TDR-21 | Audit | Append-only audit events, restricted access, avoid sensitive payloads | Approved |
-| TDR-22 | Domains/custom domains | Domain verification, tenant mapping, SSL, cache invalidation | Approved requirements; vendor/workflow detail pending |
-| TDR-23 | Analytics | Start with PostgreSQL queries/views; add analytics platform only for measured needs | Approved |
-| TDR-24 | API/schema exposure | Expose only reviewed surface; restricted schemas stay private; privileged functions/views tested | Approved |
+```mermaid
+flowchart TD
+  U[School staff, guardians, students] --> WEB[React + TypeScript web app]
+  PUB[Public school website visitors] --> WEBPUB[Public website rendering]
+  WEB --> API[Cloudflare Workers API]
+  WEB --> AUTH[Supabase Auth]
+  WEBPUB --> PUBAPI[Approved public-content API]
+  API --> AUTH
+  API --> DB[(Supabase PostgreSQL)]
+  PUBAPI --> DB
+  API --> FILES[Private Cloudflare R2 candidate]
+  API --> PAY[Provider-neutral payment adapters]
+  PAY --> EXT[Payment providers]
+  DB --> AUD[Restricted audit events]
+  GH[GitHub repository] --> CI[CI/CD after authorization]
+  CI --> WEB
+  CI --> API
+```
 
-## Approved technical baseline
+## 3. Approved technology baseline
 
-### Platform and deployment
-- **Database:** Supabase-managed PostgreSQL.
-- **Identity:** Supabase Auth; application profile and school memberships separate from auth identity.
-- **Backend/API:** Cloudflare Workers, API-first for core/sensitive workflows.
-- **Frontend:** React + TypeScript; Vercel hosting.
-- **Object storage:** private Cloudflare R2 baseline candidate.
-- **Source control:** GitHub.
-- **Migrations:** Supabase CLI, committed to repository and reviewed.
-- **Tests:** automated unit/integration/security tests; browser acceptance tests planned.
-- Keep the platform intentionally lean and validate plan limits and costs before deployment.
+| Layer | Baseline | Design notes |
+|---|---|---|
+| Web frontend | React + TypeScript | Responsive staff, guardian, student and admin experiences |
+| Frontend hosting | Vercel | Separate preview/staging/production configuration |
+| Backend/API | Cloudflare Workers | API-first for core/sensitive actions, validation, authorization, rate limiting and integrations |
+| Database | Supabase PostgreSQL | Relational integrity; private domain schemas; RLS |
+| Authentication | Supabase Auth | Auth UUID linked to app identity; memberships/roles stored separately |
+| File/object storage | Private Cloudflare R2 candidate | Quarantine, scanning, metadata, signed access; provider verification required |
+| Source control | GitHub | Reviewable docs, code and migrations |
+| Migration tool | Supabase CLI | Ordered SQL migrations, locally replayable and tested |
+| Testing | Unit/integration/security + browser acceptance | Exact tooling versions chosen during implementation |
+| Observability | Provider logs/metrics plus application audit | Define retention, alerts, privacy and cost before launch |
 
-### Tenancy, security and database
-- Tenant context must be resolved server-side from authenticated user and active membership; a client-provided school ID is only a selector and must be validated.
-- PostgreSQL RLS is mandatory defense-in-depth; all policies fail closed and are tested for cross-tenant access.
-- Private/restricted schemas are not exposed to browser/anonymous API roles.
-- SQL helper functions use safe search paths and least privilege. Avoid SECURITY DEFINER unless a reviewed need exists.
-- Use UUIDv4 initially. Never expose sequential identifiers as public identifiers.
-- Domain schemas/namespaces keep platform, school core, academics, school finance, CMS/private, communications, restricted data, XEN billing and operations separated.
-- Auth credentials and privileged secrets are never copied into application records or frontend code.
+## 4. Logical domain boundaries
+Use clear database namespaces/schemas or controlled domain groupings. Proposed domains:
+- **platform:** tenants/schools, memberships, roles, permissions, subscription/tenant settings.
+- **school_core:** people, students, guardians, staff, verified relationships, enrolments.
+- **academics:** campuses, calendars, academic years/terms, classes, subjects, attendance, assessment, results, report cards, admissions.
+- **school_finance:** fees, invoices, payments, allocations, receipts, accounting and ledger.
+- **cms_private:** website configuration, authoring, drafts, media metadata, review and publication records.
+- **communications:** messaging, notifications, templates, preferences, moderation, delivery/read states.
+- **restricted:** health and safeguarding; restricted grants and audit.
+- **xen_billing:** XEN subscriptions, plans, usage, entitlements, invoices and platform payments.
+- **operations:** support, jobs, webhooks, exports, audit metadata and platform operations.
 
-### Time and currency
-- Store instants as timestamptz (UTC); use date for date-only facts; store relevant IANA timezone.
-- Monetary values use integer minor units and currency codes with currency-specific precision. Do not assume two decimal places.
-- Conversions store source amount/currency, target amount/currency, rate, source and timestamp as applicable. No cross-currency summation without explicit conversion.
-- Zimbabwe currency and tender rules must be configurable and reviewed against current law/policy; no single global currency is hardcoded.
+Domain separation is logical and does not replace grants, authorization or RLS. Restricted schemas must not be exposed to anonymous or ordinary browser roles.
 
-### Finance, payments and public content
-- School finance and XEN SaaS billing are separate domains, lifecycle and permission systems.
-- Posted ledger entries are immutable; correction uses reversal/adjustment.
-- Payment confirmation is server-side verified and idempotent; reconcile provider transactions; do not trust browser success.
-- CMS authoring is private; publication creates explicit version/status. Anonymous reads only approved public projections and media; unpublish invalidates cache.
-- Public pages must not expose student, guardian, attendance, assessment, finance, health or safeguarding data.
+## 5. Request and authorization pattern
+1. Authenticate the user with Supabase Auth.
+2. Client may select a school/campus context, but the API resolves and validates active membership from the authenticated subject.
+3. API validates input, checks permission and tenant context, applies rate limits and idempotency where relevant.
+4. Database operations run with a least-privilege identity and tenant context; RLS is enforced as defence in depth.
+5. Sensitive actions are audited without unnecessarily copying personal/sensitive payloads.
+6. Return only the minimum data required by the role and operation.
 
-### File security
-- Private objects by default; object keys contain no personal information.
-- Upload to quarantine, validate type/size, scan, authorize, then serve by short-lived signed URL or Worker-mediated delivery.
-- Public assets require explicit publication/rights/consent checks. Metadata and object lifecycle/retention are tracked.
+No privileged database/service credentials may reach browser code. Client-provided tenant IDs or role labels are never authoritative.
 
-### Privacy, audit and recovery
-- Maintain data inventory, purpose, lawful basis/consent where applicable, access/correction, retention, deletion/anonymization, legal holds, exports and incident response.
-- Children's data and restricted health/safeguarding data require heightened access controls and jurisdiction-specific review.
-- Audit is append-only and access-restricted; avoid unnecessarily storing sensitive payloads.
-- Backups, PITR, independent encrypted backups, key custody, restore drills and RPO/RTO must be documented and tested. A provider's backup feature alone is not sufficient.
+## 6. Public website boundary
+School CMS authoring and drafts remain private. Publishing requires explicit review/approval and creates a version/publication record. Public website reads use a dedicated safe projection/API that exposes only approved published content and approved public media for a verified domain. Unpublishing must invalidate relevant cache. Public routes must not join or expose student/guardian, attendance, results, finance, health or safeguarding data.
 
-## Pre-implementation verification gates
-These are not architecture reversals; they are required due diligence before selecting production services or creating production migrations:
-1. Confirm Supabase PostgreSQL version, region, tier, extensions, pooling, backup/PITR, pricing and latency.
-2. Confirm legal/privacy review for data residency, child data, retention, consent, school contracts and deletion/exports.
-3. Define RPO/RTO by domain; test backup restoration and recovery procedure.
-4. Validate R2 vs Supabase Storage costs/features, file scanning, signed access, backup and lifecycle.
-5. Select payment providers after Zimbabwe/international market and legal feasibility review; sandbox and webhook verification.
-6. Validate domain verification, SSL, tenant routing and cache purge behavior.
-7. Confirm API exposure and role/grant model; review RLS policies and tenant isolation threat model.
-8. Confirm hosting plan limits, costs, observability, secrets and deployment/rollback procedures.
-9. Decide operational support, incident response, escalation and audit access.
-10. Obtain final implementation-stage authorization before executable SQL, migrations, application code, CI, infrastructure or deployment.
+## 7. Financial and payment architecture
+- School finance and XEN SaaS billing are separate domains, permissions, record lifecycles and reporting.
+- Posted ledger entries are immutable. Corrections use reversals/adjustments.
+- Store monetary amounts as integer minor units plus currency code and currency-specific precision. Never assume every currency has two decimal places.
+- Conversion records retain source and target amounts/currencies, rate, source and timestamp.
+- Payment integration uses provider-neutral adapters. Server-side verification, idempotency, webhook authentication, reconciliation, refund/chargeback state and audit are required. Provider selection remains a verification task.
 
-## Change control
-Any change to this baseline must be recorded as an amendment with decision ID, proposed change, reason, impact (security, tenancy, privacy, cost, migration compatibility, operations), alternatives considered, owner approval, and update to relevant documents.
+## 8. File handling
+Files are private by default. The upload lifecycle is:
+1. Create authorized metadata record and upload intent.
+2. Upload to quarantine.
+3. Validate size, type and content; scan for malware.
+4. Mark clean only after verification.
+5. Authorize each access and serve through short-lived signed URL or Worker-mediated delivery.
+6. Track retention, deletion, backup and legal hold where applicable.
+7. Public assets require explicit publication, rights and consent checks.
 
-## Implementation boundary
-This is architecture documentation only. It does not authorize or constitute SQL migrations, executable schema, seed data, application code, CI workflows, infrastructure provisioning, or deployment.
+Object keys must not contain names, student numbers or other personal data.
+
+## 9. Tenant isolation and database security
+- Active tenant context is derived from authenticated identity and membership; a tenant ID from the client is only a selector.
+- RLS is mandatory and fail-closed, including cross-tenant tests for every domain.
+- RLS helper functions use safe search_path, fully qualified objects and least privilege. Avoid SECURITY DEFINER unless documented and security-reviewed.
+- Keep private/restricted schemas out of browser-facing API exposure.
+- Review database grants, exposed views/RPC, service credentials and privileged functions.
+- Membership revocation must be immediate or have a documented cache expiry/invalidation strategy.
+
+## 10. Time, currency and localization
+- Use timestamptz for instants and UTC storage; date for date-only facts.
+- Store IANA timezone settings (school/campus/user as relevant).
+- Currency uses currency code and currency-specific precision. Conversions are explicit and auditable.
+- Locale, language, date/number formatting and school configuration must be designed for Zimbabwe-first and international expansion. Do not hardcode country, currency, timezone or grading system as a global assumption.
+
+## 11. Privacy, audit and recovery
+Maintain data inventory and lawful purpose/basis, consent where required, access/correction, retention, export, deletion/anonymization, legal holds, incident response and vendor review. Children's and health/safeguarding data require heightened controls and jurisdiction-specific review. Audit records are append-only and access-restricted.
+
+Before production, define per-domain RPO/RTO, backup cadence/retention, PITR capability, independent encrypted backup, key custody and restoration drills. Recovery must consider database, auth, object storage, DNS, secrets and application compatibility.
+
+## 12. Environment and delivery model
+- Local development uses synthetic data and a local/test database.
+- Staging is isolated from production and uses no production personal data.
+- Production secrets are managed server-side and never committed or embedded in frontend.
+- Migrations are versioned in Git, reviewed, replayed from an empty database and applied through controlled release steps.
+- CI/CD, hosting and infrastructure configuration are not to be implemented until the owner separately authorizes implementation.
+- Release process must include backup/restore plan, rollback or forward-fix plan, smoke tests, monitoring and change approval.
+
+## 13. Required pre-production verification
+- [ ] Confirm Supabase region/tier, version, extensions, pooling, backup/PITR, cost and latency.
+- [ ] Complete legal/privacy review for child data, residency, retention, consent, school contracts and deletion/export.
+- [ ] Define RPO/RTO by domain and complete a restoration drill.
+- [ ] Verify R2/storage choice, cost, scanning, signed access, lifecycle and backup.
+- [ ] Select payment providers after market/legal review; test sandbox and verified callbacks.
+- [ ] Verify custom-domain ownership, tenant routing, SSL and cache invalidation.
+- [ ] Review grants, RLS, exposed schemas/views/RPC and tenant-isolation threat model.
+- [ ] Confirm plan limits, costs, observability, secrets, support and incident escalation.
+- [ ] Approve migration implementation plan and rollback strategy.
+- [ ] Obtain separate implementation authorization.
+
+## 14. Implementation boundary
+This architecture baseline does not create or authorize executable SQL, migration files, seed data, application code, CI workflows, infrastructure, or deployment. The next planning stage is a pre-implementation readiness checklist and sign-off package.
