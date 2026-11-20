@@ -75,7 +75,7 @@ The audit found several documentation gaps and stale contradictions. These have 
 ### G0-05 — Admissions fee configuration (High) — RESOLVED
 **Finding:** Campaign fee fields and a separate fee-settings table duplicated mutable fee configuration; no clear snapshot model was stated.
 
-**Correction:** Made versioned `admission_fee_settings` the canonical free/paid/waiver/refund configuration. Submitted applications preserve an application-fee snapshot; admission payments reference that snapshot and remain separate from tuition. Updated relationships and blueprint.
+**Correction:** Made versioned `admission_fee_settings` the canonical free/paid/waiver/refund configuration. Submitted applications preserve an application-fee snapshot; admission payments reference that snapshot, and refunds are separately capped/approved. These remain separate from tuition. Updated relationships and blueprint.
 
 ### G0-06 — Currency precision and conversions (High) — RESOLVED
 **Finding:** Approved multi-currency and explicit conversions were not fully represented in the finance dictionary; “minor units” could be interpreted as universally two decimals.
