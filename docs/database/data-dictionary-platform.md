@@ -69,9 +69,17 @@ A guardian may have an account later or not; contact details are school-scoped.
 - `id`, `school_id FK`, `guardian_id FK`, `student_id FK`, `relationship_type text`, `is_primary_contact boolean`, `is_emergency_contact boolean`, `can_pick_up boolean`, `can_view_academic boolean`, `can_view_attendance boolean`, `can_view_finance boolean`, `legal_authority_status text`, `verified_at`, `verified_by uuid`, `valid_from date`, `valid_to date nullable`, `created_at`, `updated_at`.
 Unique active guardian/student relationship as appropriate; every portal access must check active and verified relationship and permissions.
 
+### student_emergency_contacts
+- `id, school_id FK, student_id FK, contact_name, relationship nullable, phone, email nullable, address nullable, contact_priority, is_authorised_pickup boolean, contact_scope text, valid_from date, valid_to date nullable, verification_status, verified_by uuid nullable, verified_at nullable, created_at, updated_at`.
+Emergency contacts may be separate from guardians. Contact/pick-up authority is not portal access or legal guardianship; verify and restrict by school policy.
+
+### guardian_access_restrictions
+- `id, school_id FK, student_id FK, guardian_student_link_id nullable FK, restricted_person_reference nullable, restriction_type, scope jsonb, effective_from date, effective_to date nullable, status, source_type, verified_by uuid, verified_at, legal_document_file_id uuid nullable FK files, review_due date nullable, created_by uuid, timestamps`.
+Restricted legal/custody/access-order metadata. Store only the minimum necessary details; document content is highly restricted. Enforce restrictions in authorization services and RLS policies, with expiry/review and audited changes. Do not treat a guardian link or consent flag as overriding a current legal restriction.
+
 ### student_enrolments
-- `id`, `school_id FK`, `student_id FK`, `academic_year_id FK`, `grade_level_id FK`, `class_id FK nullable`, `stream_id FK nullable`, `enrolment_status text`, `enrolment_date date`, `exit_date date nullable`, `exit_reason text nullable`, `previous_school text nullable`, `created_by uuid`, timestamps.
-One enrolment per student/year unless explicit repeat/transfer model is approved. Maintain historical records.
+- `id, school_id FK, student_id FK, academic_year_id FK, calendar_id nullable FK academic_calendars, grade_level_id FK, programme_id nullable, class_id FK nullable, stream_id FK nullable, enrolment_type, concurrent_group_id nullable, is_primary boolean, enrolment_status text, enrolment_date date, exit_date date nullable, exit_reason text nullable, previous_school text nullable, created_by uuid, timestamps.
+Support controlled concurrent enrolments only where school rules/programme combinations permit. Require a defined primary enrolment per applicable scope and preserve programme/class transfer history. Validate allowed combinations and prevent unintended overlap; do not apply a blanket one-enrolment-per-year restriction.
 
 ### staff
 - `id`, `school_id FK`, `staff_number text NOT NULL`, `user_id uuid nullable FK user_profiles`, `given_name`, `middle_name`, `family_name`, `preferred_name`, `email`, `phone_e164`, `date_of_birth date nullable`, `employment_status text`, `photo_file_id uuid nullable`, timestamps.
