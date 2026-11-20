@@ -34,4 +34,4 @@
 
 ## Approval boundary
 
-This approved baseline updates the design specification only. **No application code, SQL migrations, executable schema, seed data, infrastructure deployment or implementation has been authorized by this approval.** Next step: prepare and review the database implementation roadmap, migration sequence, and detailed security/RLS design for separate approval.
+This approved baseline updates the design specification only. **No application code, SQL migrations, executable schema, seed data, infrastructure deployment or implementation has been authorized by this approval.** Next step: complete Gate 0 scope/consistency audit, close documentation blockers, then prepare the readiness evidence and scoped implementation authorization. Technical verification remains separate from product-decision approval.
