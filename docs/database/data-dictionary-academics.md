@@ -69,7 +69,7 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 `id, school_id, assessment_id FK, student_id FK, total_score numeric, percentage numeric nullable, grade_label text nullable, grade_points numeric nullable, rank nullable, calculation_version text, result_status, calculated_at, approved_by uuid nullable, approved_at nullable, published_at nullable, timestamps`. Unique assessment/student; calculated values are snapshots, recalculate with versioned process before publication.
 
 ### report_cards
-`id, school_id, student_en enrolment_id FK` (field name should be `student_enrolment_id`), academic_year_id FK, term_id nullable FK, report_card_type, status, generated_at, approved_by uuid nullable, approved_at nullable, published_at nullable, file_id uuid nullable FK files, created_by uuid, timestamps`. Unique enrolment/year/term/type. Treat report output as snapshot.
+`id, school_id, student_enrolment_id FK` (field name should be `student_enrolment_id`), academic_year_id FK, term_id nullable FK, report_card_type, status, generated_at, approved_by uuid nullable, approved_at nullable, published_at nullable, file_id uuid nullable FK files, created_by uuid, timestamps`. Unique enrolment/year/term/type. Treat report output as snapshot.
 
 ### report_card_items
 `id, school_id, report_card_id FK, subject_id FK, assessment_summary jsonb, total_score numeric nullable, grade_label nullable, teacher_comment nullable, position, timestamps`. JSON is only for a versioned summary snapshot; underlying marks remain relational.
