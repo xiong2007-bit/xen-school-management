@@ -11,7 +11,7 @@
 ### currency_conversion_snapshots
 `id uuid PK, school_id FK, source_amount_minor bigint, source_currency char(3), target_amount_minor bigint, target_currency char(3), exchange_rate numeric, exchange_rate_id nullable FK exchange_rates, rate_source, rate_as_of timestamptz, rounding_method, conversion_reason, converted_by uuid, created_at`. Immutable evidence for each conversion; store the actual rate and both amounts so historical values do not depend on later rate changes. Cross-currency allocation or reconciliation requires an explicit conversion snapshot and policy.
 
-This design distinguishes each school's operational finance from XEN's own SaaS subscription billing. Finance tables use explicit currency and integer minor units for amounts (e.g., cents). Each posted transaction is immutable; corrections use reversals, credits or adjustments. Provider callbacks are idempotent. Payment is not considered verified solely because a screenshot/proof file was uploaded.
+This design distinguishes each school's operational finance from XEN's own SaaS subscription billing. Finance tables use currency-specific precision and integer minor units; a currency may have zero, two, or three decimal places depending on its registry definition. Each posted transaction is immutable; corrections use reversals, credits or adjustments. Provider callbacks are idempotent. Payment is not considered verified solely because a screenshot/proof file was uploaded.
 
 ## 7. Core school fees (first finance phase)
 
