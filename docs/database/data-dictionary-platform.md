@@ -82,7 +82,7 @@ Unique active guardian/student relationship as appropriate; every portal access 
 Emergency contacts may be separate from guardians. Contact/pick-up authority is not portal access or legal guardianship; verify and restrict by school policy.
 
 ### guardian_access_restrictions
-- `id, school_id FK, student_id FK, guardian_student_link_id nullable FK, restricted_person_reference nullable, restriction_type, scope jsonb, effective_from date, effective_to date nullable, status, source_type, verified_by uuid, verified_at, legal_document_file_id uuid nullable FK files, review_due date nullable, created_by uuid, timestamps`.
+- `id, school_id FK, student_id FK, guardian_id nullable FK guardians, guardian_student_link_id nullable FK guardian_student_links, restriction_type, scope jsonb, effective_from date, effective_to date nullable, status, source_type, verified_by uuid, verified_at, legal_document_file_id uuid nullable FK files, review_due date nullable, created_by uuid, timestamps`. Require a valid target guardian/link and same-student scope; do not store target identity as unvalidated free text.
 Restricted legal/custody/access-order metadata. Store only the minimum necessary details; document content is highly restricted. Enforce restrictions in authorization services and RLS policies, with expiry/review and audited changes. Do not treat a guardian link or consent flag as overriding a current legal restriction.
 
 ### student_enrolments
