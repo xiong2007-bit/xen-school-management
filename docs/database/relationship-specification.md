@@ -144,7 +144,7 @@
 - Data export/deletion requests are school-scoped and subject-verified; consent records use typed subject references with application validation.
 - File metadata is central. Domain tables point to files through ordinary FKs. Object key uniqueness and tenant/private access policies are enforced.
 
-## L. Restricted health and safeguarding
+## M. Restricted health and safeguarding
 
 - Student health profiles, conditions, allergies, visits, medication records and administration events are restricted to designated roles; use minimal data and separate access logs.
 - Safeguarding incidents may have referrals and action plans. Each record is restricted; all access, edits and exports are audited. Never expose these records through general student profile, guardian messaging or public website.
