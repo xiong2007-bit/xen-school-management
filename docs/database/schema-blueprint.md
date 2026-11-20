@@ -144,6 +144,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | admission_fee_settings | id | school_id | campaign/version; fee-required, amount/currency, waiver/refund, effective dates | P1 | Admissions/bursar split permissions |
 | admission_application_fee_snapshots | id | school_id | application; fee config/version and assessed terms; waiver/amount snapshot | P2 | Admissions/bursar |
 | admission_payments | id | school_id | application/fee snapshot; amount/currency; idempotency; verified | P2 | Bursar/admissions split permissions |
+| admission_payment_refunds | id | school_id | original payment; refund cap; approval/status | P2/P3 | Finance approver; audited |
 | admissions_conversion_log | id | school_id | application/student/enrolment; unique conversion key | P2 | Registrar/admin; append-only |
 
 ### F. School finance (distinct ledger domain)
