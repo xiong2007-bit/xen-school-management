@@ -89,6 +89,7 @@
 - `payments 1—N refunds`; refund approval rows attach to refund.
 - Invoice credit notes/adjustments attach to invoice; no deletion of posted items.
 - Bank account has imports; import has statement entries; reconciliation matches one or more statement entries to payment/journal lines using explicit matching groups where split matches are supported.
+- Currency definitions supply precision; exchange-rate records retain source, effective time and approval. Conversion snapshots preserve source/target amounts, currencies, rate, timestamp, rounding and reason. Cross-currency reconciliation/allocation requires explicit conversion evidence.
 - `currency_definitions` supplies precision; `exchange_rates` retain source, effective time and approval. `currency_conversion_snapshots` preserve source/target amounts, currencies, rate, timestamp, rounding and reason. Cross-currency reconciliation/allocation must reference conversion evidence.
 - Chart accounts form parent/child hierarchy. Accounting period contains journals; journal has lines; line references one account.
 - Expenses reference category, optional supplier/period; category may map to chart account. Purchase request may reference supplier; budget belongs to period and has budget items by account.
@@ -143,7 +144,7 @@
 - Data export/deletion requests are school-scoped and subject-verified; consent records use typed subject references with application validation.
 - File metadata is central. Domain tables point to files through ordinary FKs. Object key uniqueness and tenant/private access policies are enforced.
 
-## M. Restricted health and safeguarding
+## L. Restricted health and safeguarding
 
 - Student health profiles, conditions, allergies, visits, medication records and administration events are restricted to designated roles; use minimal data and separate access logs.
 - Safeguarding incidents may have referrals and action plans. Each record is restricted; all access, edits and exports are audited. Never expose these records through general student profile, guardian messaging or public website.
