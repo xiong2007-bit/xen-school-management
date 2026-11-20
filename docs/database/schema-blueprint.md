@@ -292,6 +292,16 @@ Classify each row and sensitive field. Public website content must never be popu
 
 **No shared tables or identifiers with school invoices/payments.** SaaS plan charges must not be posted into a school's tuition ledger. Only explicitly designed settlement reports may cross the boundary.
 
+## L. Restricted health and safeguarding
+
+| Table group / tables | Key relationship/constraints | Class/lifecycle | RLS intent |
+|---|---|---|---|
+| student_health_profiles, student_health_conditions, student_allergies | student; minimal necessary fields; validity/review; separate sensitivity | P3; active/reviewed/expired | Designated health staff only |
+| health_visits, medication_records, medication_administration_events | student/medication; time; administration event immutable | P3 | Need-to-know; no general parent/profile access |
+| safeguarding_incidents | student optional; incident type/date; restricted narrative; assigned role | P3; reported/assessed/action/closed | Safeguarding designated roles only |
+| safeguarding_referrals, safeguarding_action_plans | incident; referral/plan owner, review and outcome | P3 | Designated case team |
+| restricted_record_access_logs | record/actor/purpose/outcome/time | P3; append-only | Security/privacy reviewer |
+
 ## 5. Lifecycle and state-machine conventions
 
 - Tenant: onboarding → trial/active → suspended → active or closed; closed is terminal except approved reopening.
@@ -383,16 +393,6 @@ Use separate permission keys and separate RLS policies for SELECT/INSERT/UPDATE/
 12. Backup/restore and recovery drills with integrity verification.
 13. Domain expert review for finance, legal/custody, health/safeguarding, Zimbabwe and future-market privacy.
 14. Product owner accepts phase scope and pilot validation.
-
-### L. Restricted health and safeguarding
-
-| Table group / tables | Key relationship/constraints | Class/lifecycle | RLS intent |
-|---|---|---|---|
-| student_health_profiles, student_health_conditions, student_allergies | student; minimal necessary fields; validity/review; separate sensitivity | P3; active/reviewed/expired | Designated health staff only |
-| health_visits, medication_records, medication_administration_events | student/medication; time; administration event immutable | P3 | Need-to-know; no general parent/profile access |
-| safeguarding_incidents | student optional; incident type/date; restricted narrative; assigned role | P3; reported/assessed/action/closed | Safeguarding designated roles only |
-| safeguarding_referrals, safeguarding_action_plans | incident; referral/plan owner, review and outcome | P3 | Designated case team |
-| restricted_record_access_logs | record/actor/purpose/outcome/time | P3; append-only | Security/privacy reviewer |
 
 ## 11. Technical verification items (decisions accepted; evidence still required)
 
