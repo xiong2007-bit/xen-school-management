@@ -15,6 +15,7 @@
 9. [Database implementation roadmap](implementation-roadmap.md)
 10. [Comprehensive schema blueprint](schema-blueprint.md)
 11. [Migration manifest and acceptance gates](migration-manifest.md)
+12. [Technical decision register](technical-decision-register.md)
 
 ## Coverage
 
@@ -45,4 +46,4 @@ The specification describes the platform/tenant model; users and roles; students
 
 ## Before implementation
 
-The 13 previously open decisions have been accepted and documented in `approved-design-decisions.md`. The implementation roadmap is available in `implementation-roadmap.md`. Next: review/approve the schema blueprint and migration manifest; confirm unresolved technical decisions and validate jurisdiction-specific privacy/retention, payment integrations and operational workflows. Implementation remains unauthorized until separately approved. Implementation remains unauthorized until separately approved.
+The 13 previously open decisions have been accepted and documented in `approved-design-decisions.md`. The implementation roadmap is available in `implementation-roadmap.md`. Next: review the schema blueprint, migration manifest and technical decision register; confirm unresolved technical decisions and validate jurisdiction-specific privacy/retention, payment integrations and operational workflows. Implementation remains unauthorized until separately approved. Implementation remains unauthorized until separately approved.
