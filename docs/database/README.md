@@ -18,9 +18,10 @@
 12. [Technical decision register — approved baseline](technical-decision-register.md)
 13. [Technical architecture baseline](technical-architecture-baseline.md)
 14. [Pre-implementation readiness checklist](pre-implementation-readiness-checklist.md)
+15. [Gate 0 scope and consistency audit](gate-0-scope-consistency-audit.md)
 
 ## Coverage
-The specification covers platform/tenant model; users, roles and access; students, guardians, verified links, enrolments and staff; academic years, terms, grades, classes, streams, subjects and calendars; attendance; assessments, moderation, results and report cards; admissions; school finance and accounting; website/CMS/domains/translations/forms; parent/student portals and communications; library; transport; document management; support desk; XEN subscriptions/usage; audit/security/consent/exports/deletion/jobs/webhooks/backups; and file metadata.
+The specification covers platform/tenant model; users, roles and access; students, guardians, verified links, emergency contacts/legal restrictions, enrolments and staff; academic programmes/calendars/terms/events, classes/subjects, timetable periods/rooms/versioned schedules; attendance; configurable assessment/grading/promotion/report templates; admissions and fee snapshots; school finance, currency conversions and accounting; website builder/reusable blocks/CMS/domains/translations/forms; parent/student portals and communications/read receipts/moderation; library, transport, boarding, meals, clubs, activities and trips; restricted health/safeguarding; documents, service desk; XEN subscriptions/usage; audit/security/consent/exports/deletion/jobs/webhooks/backups; and file metadata. School groups and student portal features are explicitly future/optional.
 
 ## Approved design principles
 - Multi-tenant data isolation and tenant-safe composite relationships.
@@ -53,6 +54,10 @@ The specification covers platform/tenant model; users, roles and access; student
 - Integer minor units with currency code and currency precision registry.
 - Domain-separated schemas, private restricted schemas, safe public CMS projections.
 - Managed server-side secrets; append-only audit; automated tenant/security tests.
+
+## Gate 0 audit result
+
+**PASS WITH ACTIONS:** The authoritative 22-page Master Plan v3.0 was reviewed and all 28 sections/appendices were mapped. High-priority documentation inconsistencies were corrected. Exact first-release scope, pilot validation, product requirement IDs and technical/provider/legal verification remain open. [Read audit report](gate-0-scope-consistency-audit.md).
 
 ## Remaining verification before production
 Region/tier and provider capabilities; privacy/legal review and retention schedule; payment provider selection; storage validation; RPO/RTO and recovery drill; domain routing/SSL; role/RLS/API exposure review; operational cost/limits, observability, support and rollback.
