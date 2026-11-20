@@ -24,7 +24,9 @@
 
 - `schools 1—N students`; unique school/student_number.
 - `schools 1—N guardians`; guardian user account is optional.
-- `students N—M guardians` via `guardian_student_links`. Link carries relationship, verification, legal authority, contact and portal permission flags; it is the gate for guardian access.
+- `students N—M guardians` via `guardian_student_links`. Link carries relationship, verification, contact and portal permission flags; it is the gate for guardian access.
+- `students 1—N student_emergency_contacts`; emergency/pick-up authority is not equivalent to guardian/legal authority or portal access.
+- `students 1—N guardian_access_restrictions`; restrictions may target a guardian link or another identified person, carry verified source metadata, scope, effective dates and review/expiry. Authorization must apply these restrictions in addition to relationship permissions.
 - `students 1—N student_enrolments`; enrolment references one academic year and grade, optionally class/stream.
 - `students 1—N student_class_assignments` through enrolment history; each assignment references a class and optional stream.
 - `schools 1—N staff`; staff may link to a user account.
@@ -34,7 +36,11 @@
 
 ## C. Academics
 
-- `schools 1—N academic_years`; year contains terms (`academic_years 1—N academic_terms`).
+- `schools 1—N academic_calendars`; calendars may apply to campus/programme/cohort and may overlap.
+- `academic_calendars 1—N academic_years`; each year belongs to one calendar and has calendar-scoped dates/current state. `academic_years 1—N academic_terms`; term overlap is allowed only under the calendar's explicit policy.
+- `academic_calendars 1—N calendar_events`; events may be campus-scoped and public only through publication.
+- `academic_calendars 1—N timetable_periods`; periods use local wall-clock times plus calendar/campus timezone context.
+- `academic_years 1—N timetables`; timetable has versioned entries, each tied to a class-subject offering and optional stream/teacher/room. Entries reference a period and weekday/effective dates. Validate class, teacher and room clashes within the applicable published timetable. Exceptions alter one date without overwriting recurring entries.
 - `schools 1—N grade_levels`; each class references a grade level and year.
 - `academic_years 1—N classes`; `grade_levels 1—N classes`; campus optional.
 - `classes 1—N class_streams`.
@@ -65,7 +71,8 @@
 ## F. Admissions
 
 - `admission_campaigns 1—N admission_applications`; campaign targets year and optionally grade.
-- `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_payments`.
+- `admission_applications 1—N admission_applicants, admission_guardians, admission_documents, admission_reviews, admission_interviews, admission_offers, admission_status_history, admission_application_fee_snapshots, admission_payments`.
+- `admission_campaigns 1—N admission_fee_settings`; fee settings are the canonical, versioned free/paid/waiver/refund configuration. Applications freeze the applicable fee snapshot; payments reference that snapshot. Never duplicate mutable fee amounts on campaign rows or tuition invoices.
 - `admission_applications 0..1—1 students` after authorised conversion (application's converted_student_id); conversion should be transactional and idempotent.
 - Campaign fee settings and payments reference the campaign/application; admission payment should not be confused with school fee payment.
 
@@ -108,6 +115,10 @@
 
 - `library_categories 1—N library_books`; books have copies. Copies have loan history; loans have optional fine records; reservations are for title/book and fulfilled by a copy.
 - `transport_routes 1—N transport_route_stops`; each row references a stop and sequence. Route optionally uses vehicle and driver. Students' enrolments have route assignments to a stop on the route.
+- `boarding_houses 1—N boarding_rooms`; enrolments have dated room assignments with capacity and overlap validation.
+- `meal_plans 1—N meal_orders`; enrolments may have meal orders/attendance. Dietary data is restricted.
+- `clubs/activities 1—N activity_memberships`; memberships reference enrolments, consent and capacity.
+- `trips 1—N trip_permissions, trip_attendance`; permissions are guardian-authority checked, and attendance is recorded per enrolment.
 - Transport incidents may reference route/vehicle/student but remain restricted.
 - Document categories group documents; document versions reference files; document permissions grant scoped access; access logs record use; retention rules govern expiry.
 - Support tickets have messages, assignments, attachments and status history. Internal ticket messages are not visible to requester.
@@ -127,6 +138,12 @@
 - System jobs have job failures; webhook logs deduplicate provider events.
 - Data export/deletion requests are school-scoped and subject-verified; consent records use typed subject references with application validation.
 - File metadata is central. Domain tables point to files through ordinary FKs. Object key uniqueness and tenant/private access policies are enforced.
+
+## L. Restricted health and safeguarding
+
+- Student health profiles, conditions, allergies, visits, medication records and administration events are restricted to designated roles; use minimal data and separate access logs.
+- Safeguarding incidents may have referrals and action plans. Each record is restricted; all access, edits and exports are audited. Never expose these records through general student profile, guardian messaging or public website.
+- Retention, legal holds, reporting and parent notification are governed by policy and case-specific authorization.
 
 ## Relationship diagram — conceptual overview
 
