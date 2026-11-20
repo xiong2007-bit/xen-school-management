@@ -118,7 +118,7 @@ These are feature-gated modules. Implement only after each workflow, consent, ca
 ### trip_attendance
 `id, school_id FK, trip_id FK, student_enrolment_id FK, attendance_status, checked_at nullable, recorded_by uuid, notes_restricted nullable, created_at`. Unique trip/learner.
 
-## 15. Documents
+## 14. Documents
 
 ### document_categories
 `id, school_id FK, name, code, sensitivity, retention_rule_id nullable, is_active, timestamps`.
@@ -138,7 +138,7 @@ These are feature-gated modules. Implement only after each workflow, consent, ca
 ### document_retention_rules
 `id, school_id FK, category_id nullable FK document_categories, retention_period_days nullable, action_at_expiry, legal_hold, description, created_at, updated_at`. Legal hold supersedes deletion workflow.
 
-## 14. Service desk
+## 15. Service desk
 
 ### support_tickets
 `id, school_id FK, ticket_number, requester_user_id nullable FK user_profiles, requester_guardian_id nullable FK guardians, category_id nullable FK ticket_categories, subject, description, priority, ticket_status, assigned_to uuid nullable, related_student_id nullable FK students, created_at, updated_at, closed_at nullable`. Ticket references only authorised context; sensitive ticket types restricted.
@@ -158,7 +158,7 @@ These are feature-gated modules. Implement only after each workflow, consent, ca
 ### ticket_status_history
 `id, school_id FK, ticket_id FK, old_status nullable, new_status, changed_by uuid, reason nullable, changed_at`. Append-only.
 
-## 15. XEN commercial SaaS billing
+## 16. XEN commercial SaaS billing
 
 These records describe billing of schools as customers of XEN, separate from student fee balances. Tenant scoping differs: subscription records reference the school customer; platform staff have controlled access.
 
@@ -192,7 +192,7 @@ These records describe billing of schools as customers of XEN, separate from stu
 ### platform_promotions
 `id uuid PK, promo_code unique, promotion_type, value, currency nullable, starts_at, ends_at, max_redemptions nullable, status, created_at, updated_at`. Redemption ledger needed before applying promotions.
 
-## 16. Security, audit and operations
+## 17. Security, audit and operations
 
 ### audit_logs
 `id uuid PK, school_id nullable FK schools, actor_user_id nullable FK user_profiles, actor_type, action, resource_type, resource_id nullable, outcome, occurred_at, request_id nullable, ip_hash nullable, user_agent_summary nullable, changes_redacted jsonb nullable`. Append-only, restricted; never store credentials or full sensitive payloads.
@@ -224,7 +224,7 @@ These records describe billing of schools as customers of XEN, separate from stu
 ### backup_records
 `id uuid PK, environment, backup_type, started_at, completed_at nullable, status, storage_reference, checksum nullable, retention_until nullable, restore_tested_at nullable, created_at`. Do not expose storage secrets; restore tests recorded.
 
-## 17. Shared file metadata (storage)
+## 18. Shared file metadata (storage)
 
 ### files
 `id uuid PK, school_id uuid nullable FK schools, storage_provider, bucket_name, object_key, original_filename, content_type, size_bytes bigint, checksum_sha256 nullable, privacy_class, uploaded_by uuid nullable FK user_profiles, scan_status, file_status, created_at, updated_at, deleted_at nullable`. Unique provider/bucket/object key. Storage objects are not public by default; public media requires explicit approval and consent checks. Do not store signed URLs as durable values.
