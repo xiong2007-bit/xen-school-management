@@ -1,6 +1,41 @@
 # Data Dictionary — Additional Services, SaaS, Audit and Storage
 
+## 10. Restricted health and safeguarding
+
+These tables are optional, phased, and require jurisdiction/school policy review before activation. Need-to-know grants, separate access audit, retention and export controls apply.
+
+### student_health_profiles
+`id, school_id FK, student_id FK, health_summary_restricted nullable, emergency_action_plan_restricted nullable, reviewed_by uuid nullable, reviewed_at nullable, valid_from, valid_to nullable, created_at, updated_at`. Store only necessary health context; avoid duplicating detailed notes in general learner profile.
+
+### student_health_conditions
+`id, school_id FK, student_id FK, condition_code nullable, description_restricted, severity nullable, onset_date nullable, status, recorded_by uuid, reviewed_by uuid nullable, created_at, updated_at`.
+
+### student_allergies
+`id, school_id FK, student_id FK, allergen, reaction_restricted, severity, emergency_instruction_restricted nullable, status, verified_by uuid nullable, verified_at nullable, created_at, updated_at`.
+
+### health_visits
+`id, school_id FK, student_id FK, visit_at timestamptz, reason_restricted, observations_restricted nullable, action_taken_restricted nullable, referred_to nullable, recorded_by uuid, guardian_notification_status nullable, created_at`. Access restricted to authorised health role.
+
+### medication_records
+`id, school_id FK, student_id FK, medication_name, dosage_restricted, schedule_restricted nullable, start_date, end_date nullable, administration_required boolean, instructions_restricted nullable, authorised_by uuid nullable, status, created_at, updated_at`. Medication administration logs, if enabled, are separate immutable events.
+
+### medication_administration_events
+`id, school_id FK, medication_record_id FK, student_id FK, administered_at timestamptz, dose_restricted, administered_by uuid, outcome, notes_restricted nullable, created_at`. Audit corrections; no silent edits.
+
+### safeguarding_incidents
+`id, school_id FK, student_id nullable FK, incident_type, occurred_at timestamptz, reported_at timestamptz, narrative_restricted, risk_level, status, assigned_to uuid nullable, reported_by uuid, created_at, updated_at`. Highly restricted, not visible through ordinary student profile, parent messaging or general exports.
+
+### safeguarding_referrals
+`id, school_id FK, incident_id FK, referral_type, recipient_agency_restricted, referred_at, status, outcome_restricted nullable, created_by uuid, timestamps`.
+
+### safeguarding_action_plans
+`id, school_id FK, incident_id FK, plan_summary_restricted, owner_user_id uuid, start_date, review_date nullable, status, created_by uuid, timestamps`.
+
+### restricted_record_access_logs
+`id, school_id FK, record_type, record_id uuid, actor_user_id uuid, access_action, purpose, outcome, occurred_at, request_id nullable`. Append-only access audit, with log visibility separately restricted.
+
 ## 11. Library
+
 
 ### library_books
 `id, school_id FK, isbn nullable, title, subtitle nullable, authors jsonb, publisher nullable, publication_year nullable, category_id nullable FK library_categories, language_code, description nullable, cover_file_id nullable FK files, created_at, updated_at`. Catalogue metadata; ISBN unique per school when present.
@@ -43,7 +78,47 @@
 ### transport_incidents
 `id, school_id FK, route_id nullable FK, vehicle_id nullable FK, student_id nullable FK, incident_at, incident_type, description_restricted, reported_by uuid, resolution nullable, resolved_by uuid nullable, resolved_at nullable, timestamps`. Restricted safeguarding/safety access.
 
-## 13. Documents
+## 13. Boarding, meals, activities and trips (optional modules)
+
+These are feature-gated modules. Implement only after each workflow, consent, capacity, finance and safeguarding requirements are reviewed.
+
+### boarding_houses
+`id, school_id FK, campus_id nullable FK, house_code, name, house_type, capacity nullable, status, timestamps`. Unique code per school.
+
+### boarding_rooms
+`id, school_id FK, house_id FK, room_code, capacity, status, timestamps`. Room must belong to the same school/house.
+
+### boarding_assignments
+`id, school_id FK, student_enrolment_id FK, room_id FK, start_date, end_date nullable, assignment_status, assigned_by uuid, timestamps`. Validate capacity, date overlap and approved assignment rules.
+
+### meal_plans
+`id, school_id FK, plan_code, name, meal_type, price_minor nullable, currency nullable, effective_from, effective_to nullable, status, timestamps`. Meal fees remain linked to school finance using explicit fee/payment workflow.
+
+### meal_orders
+`id, school_id FK, student_enrolment_id FK, meal_plan_id FK, service_date date, order_status, dietary_notes_restricted nullable, created_by uuid, timestamps`. Restricted dietary details; validate order date and plan eligibility.
+
+### meal_attendance
+`id, school_id FK, meal_order_id FK nullable, student_enrolment_id FK, service_date date, meal_type, attendance_status, recorded_by uuid, created_at`. Unique per learner/date/meal type as policy requires.
+
+### clubs
+`id, school_id FK, club_code, name, description nullable, staff_lead_id nullable FK staff, capacity nullable, status, timestamps`.
+
+### activities
+`id, school_id FK, activity_type, title, description nullable, starts_at timestamptz, ends_at nullable, venue nullable, capacity nullable, lead_staff_id nullable FK staff, activity_status, permission_required boolean, created_by uuid, timestamps`. Supports clubs, sports, events and school activities.
+
+### activity_memberships
+`id, school_id FK, activity_id FK, student_enrolment_id FK, joined_at, left_at nullable, membership_status, consent_status, timestamps`. Validate capacity and eligibility.
+
+### trips
+`id, school_id FK, trip_code, title, destination, starts_at timestamptz, ends_at nullable, transport_plan nullable, lead_staff_id FK staff, trip_status, permission_required boolean, created_by uuid, timestamps`.
+
+### trip_permissions
+`id, school_id FK, trip_id FK, student_enrolment_id FK, guardian_student_link_id FK, permission_status, signed_at nullable, evidence_file_id nullable FK files, submitted_at nullable, reviewed_by uuid nullable, reviewed_at nullable, timestamps`. Only verified legal/authorised guardian can grant permission; apply custody/access restrictions.
+
+### trip_attendance
+`id, school_id FK, trip_id FK, student_enrolment_id FK, attendance_status, checked_at nullable, recorded_by uuid, notes_restricted nullable, created_at`. Unique trip/learner.
+
+## 15. Documents
 
 ### document_categories
 `id, school_id FK, name, code, sensitivity, retention_rule_id nullable, is_active, timestamps`.
