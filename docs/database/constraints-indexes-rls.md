@@ -103,20 +103,36 @@ Use transactions for: enrolment conversion; invoice posting; payment verificatio
 
 Collect only necessary data. Sensitive medical, safeguarding, legal authority, national ID, financial account, bursary and incident details should be isolated into restricted tables or access classes rather than ordinary profile fields. Establish school- and jurisdiction-specific retention rules, guardian consent/authority, lawful processing, export and deletion workflows. This blueprint is not legal advice or compliance certification.
 
-## 8. Open design decisions to resolve before migrations
+## 8. Accepted product decisions and remaining technical verification
 
-1. School calendar model: allow overlapping terms, multiple academic calendars or year structures?
-2. Enrolment: can one student have multiple concurrent enrolments at a school (e.g., dual programmes)?
-3. Mark model: assessment component weighting, subject aggregation and rank rules per school.
-4. Finance: multi-currency per invoice; conversion policy for payments in another currency; tax treatment and credit-note rules.
-5. Accounting: cash/accrual, chart-of-accounts templates, fiscal year and journal source mappings.
-6. Admission fees: free or paid per campaign; waivers and refunds.
-7. Guardian permissions: whether one guardian can be restricted to specific categories/children and whether legal restrictions need a dedicated access-control record.
-8. Medical/safeguarding: whether a restricted optional module is required in initial product and exact access/retention rules.
-9. Website content: translation workflow, consent for images, publication review roles and public event visibility.
-10. Messaging: whether group messaging, moderation and retention requirements are included at launch.
-11. Transport: routes, recurring schedules, boarding/transport variants and emergency workflows.
-12. SaaS pricing: seat/student bands, feature quotas, trial, grace period and promotion redemption schema.
-13. Data residency, backup retention, audit retention and deletion policy by country.
+The following are **approved product/design decisions** and must not be reopened as unresolved in this document:
+- Flexible multiple academic calendars and overlapping terms where calendar policy permits.
+- Controlled concurrent enrolments with primary-enrolment rules and history.
+- Fully configurable grading, assessment and report-card rules.
+- Multi-currency with explicit conversion records.
+- Full accounting architecture, phased.
+- School-configurable free/paid admissions fees, currency, waivers and refund rules; separate from tuition.
+- Granular verified guardian/legal restrictions, custody and emergency-contact permissions.
+- Restricted health and safeguarding modules, phased.
+- Mixed website publishing controls and consent safeguards.
+- Full communications system with read receipts, permissions, moderation and history.
+- Optional transport, boarding, meals, clubs, activities, trips, permissions and attendance.
+- Flexible XEN SaaS pricing/entitlements.
+- Flexible data governance, residency, retention, backup/recovery, deletion, export, legal holds and incident response.
 
-Resolve these in decision records before schema migrations; do not assume defaults silently.
+### Technical and operational verification still required
+1. Validate calendar, timetable, local-time and recurrence semantics; verify clash detection and timetable publication snapshots.
+2. Confirm concurrent-enrolment rules, primary scope and integrity constraints.
+3. Confirm grading calculation/versioning, ranking, promotion, report layouts and rounding.
+4. Define currency precision registry, conversion snapshots, rate source/approval and accounting treatment.
+5. Select/validate payment providers, settlement, callbacks, refunds and reconciliation.
+6. Validate guardian/legal restriction records, verification source, effective dates, review, access and legal-document protection.
+7. Complete privacy/legal review for health/safeguarding, child data, retention, residency and consent.
+8. Review website translation/review, media rights/consent, domain verification, public projection and cache invalidation.
+9. Define communications policy for group messaging, read receipts, moderation, recipient scope and retention.
+10. Validate optional service workflows and rollout gates.
+11. Define SaaS plans, quotas, trials, grace/suspension, promotion redemption and pricing.
+12. Define privacy, backup/PITR, RPO/RTO, audit retention and deletion workflows by jurisdiction.
+13. Confirm API permission/exposure, database grants, RLS, tenant context and audit immutability.
+14. Complete pilot school review of naming, workflows, grading, finance, admissions and timetable.
+
