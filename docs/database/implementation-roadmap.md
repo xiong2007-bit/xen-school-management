@@ -270,4 +270,4 @@ Although the 13 product design decisions are approved, the following technical a
 
 ## 11. Recommended next step
 
-Review and approve this roadmap. Once approved, prepare a **schema blueprint and migration manifest**: table groups, proposed primary/foreign keys, tenant keys, enum/status definitions, data classifications, dependencies and RLS policy matrix. That blueprint is still documentation. SQL implementation should only begin after a separate explicit authorization.
+The schema blueprint and D01–D19 logical migration manifest are now prepared as documentation, with a table-level reconciliation and security review supplement. The next planning work is to reconcile this logical target against the live bootstrap (including the 209-table scaffold and 13 applied migration-history entries), source/replay the existing migrations in a clean disposable database, complete readiness evidence and pilot validation, and seek explicit implementation authorization. This remains documentation/planning; no SQL is authorized by the roadmap.
