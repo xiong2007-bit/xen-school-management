@@ -74,10 +74,12 @@ The live Supabase migration history has the nine applied migration names, but th
 
 Four catalog-derived SQL files are committed under `supabase/schema-snapshot/` (tables, constraints, indexes/RLS/policies, helper/reference seed). They were moved out of `supabase/migrations/` deliberately because they are not validated migrations and would otherwise risk being auto-applied to the already-provisioned project. A clean replay has not been tested. Links: [snapshot folder](https://github.com/xiong2007-bit/xen-school-management/tree/main/supabase/schema-snapshot), [Supabase notes](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/README.md), [catalog checks](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/verification/catalog_checks.sql).
 
-## v1 web foundation (21 November 2026)
+## v1 web foundation and first onboarding workflow (21 November 2026)
 
 - React + TypeScript + Vite frontend files are committed under `apps/web/`.
 - Supabase email/password sign-in and account creation UI implemented.
+- **Secure school provisioning RPC applied**: `public.provision_school_for_current_user` requires an authenticated user with confirmed email, validates school identity fields and slug, creates school in `onboarding` status, creates active membership, assigns a tenant-scoped `school_owner` role copied from `school_admin` permission template (not platform-owner privileges), and clones permissions. Execution revoked from `PUBLIC` and `anon`, granted to `authenticated` only.
+- First-time school onboarding form is implemented in the web app and calls this RPC; success refreshes workspace school profile.
 - Read-only school workspace, overview cards, learner directory/search, class list, attendance records, and school profile implemented using authenticated Supabase client and RLS.
 - Vercel project configuration updated to project name `xen-school-management`, root directory `apps/web`, Vite build, Node 22, and output `dist`.
 - Vercel environment variables configured for Production, Preview, Development: Supabase URL, publishable key, and Cloudflare API URL. These are public client configuration values; no service-role key was set.
@@ -86,7 +88,7 @@ Four catalog-derived SQL files are committed under `supabase/schema-snapshot/` (
 
 ## Not yet implemented
 
-- Secure school onboarding, school-owner bootstrap and membership/role assignment
+- Class/grade creation and academic-year configuration
 - Student create/edit/admission/enrolment workflows (currently read-only list)
 - Class/grade creation and academic-year configuration
 - Attendance session creation and marking (currently read-only list)
@@ -106,3 +108,10 @@ Four catalog-derived SQL files are committed under `supabase/schema-snapshot/` (
 - Migration files in Git, clean-database replay, automated tests, CI, backup/recovery drill, legal/privacy review, pilot signoff
 
 **Safety:** no student, guardian, staff, school, or finance records have been inserted. This bootstrap is development infrastructure only.
+
+## v1 school provisioning migration
+
+- Applied Supabase migration `v1_verified_school_owner_provisioning`.
+- Source SQL committed: [migration](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/migrations/20261121051000_v1_verified_school_owner_provisioning.sql).
+- Catalog verification: function is `SECURITY DEFINER`, owner `postgres`, `anon` execute=false, `authenticated` execute=true. This authenticated execute grant is intentional for a narrow self-service RPC; the security advisor flags it as a warning. Function validates confirmed email from `auth.users`, does not accept a user ID, and provisions only the caller's own initial school. Keep it narrowly scoped and monitor abuse; do not add arbitrary user/role IDs to its inputs.
+- The function has not yet been exercised with a real verified user in an end-to-end browser session. No school was created during verification.
