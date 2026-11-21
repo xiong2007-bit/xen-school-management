@@ -88,3 +88,45 @@
 ## Explicit non-deliverables
 
 This manifest contains no SQL, migration scripts, executable schema, seed data, application code, CI, infrastructure, deployment configuration or production changes. It is a planning artifact only.
+
+
+## 7. Migration review checklist and table-group traceability
+
+Each ordered group is a planning label, not a migration file. Before an actual migration is authored, its PR must identify exact tables/columns and reviewed FK graph; PK and unique keys; tenant-safe composite FK exceptions; delete/update behavior; constraints and lifecycle transitions; data classification; indexes; grants/RLS/API exposure; test evidence; and migration risk/rollback or forward-fix plan.
+
+| Order | Logical domain | Table families | Tenant/security boundary | Blocking acceptance |
+|---:|---|---|---|---|
+| 0001 | conventions/reference | currency precision, reference conventions, extensions if approved | Platform/global | UUID/time/currency conventions; environment compatibility reviewed |
+| 0002 | tenant root | schools, campuses, settings | Tenant root | tenant status and unique slug; root isolation |
+| 0003 | identity | profiles, memberships | Global auth + tenant membership | active membership resolution, revoked access |
+| 0004 | authorization/audit | roles, permissions, grants, audit/security | Platform vs tenant scoped | no self-escalation; append-only audit; least privilege |
+| 0005 | file metadata | file records, classification, scan/retention metadata | Tenant + private storage | quarantine/clean and key isolation |
+| 0006 | people/HR | students, guardians, restrictions, emergency contacts, staff | Tenant; restricted HR/legal fields | guardian verification/revocation, legal restriction override |
+| 0007 | academics | calendar/year/terms, programmes, timetable, classes/subjects, enrolment | Tenant-safe academic graph | date/overlap rules, approved multiple enrolment, schedule clashes |
+| 0008 | attendance | sessions/records/corrections/notifications | Tenant + class scope | eligibility, uniqueness, corrections/audit |
+| 0009 | assessment | scheme versions, assessments, marks, moderation, results, report cards | Tenant + assigned subject | bounds, snapshots, moderation and published filtering |
+| 0010 | admissions | campaigns/apps/reviews/offers/fees/payments/conversion | Tenant; public submission isolated | public minimization, snapshot fee, idempotent conversion |
+| 0011 | school finance core | fee setup, invoice, payment, allocation, receipt | Separate school-finance domain | exact totals, verified payments, bounded allocation, receipt |
+| 0012 | public CMS | websites/pages/versions/blocks/publication/domains/forms | Private CMS and safe public projection | anonymous access only approved version; unpublish/cache purge |
+| 0013 | portals/communications | portal filters, messages, notifications, receipts, moderation | Tenant + participant/guardian scopes | recipient scope, moderation, delivery idempotency |
+| 0014 | advanced accounting | credit/refund/FX/bank/reconciliation/journals/budgets | School-finance domain | double-entry balance, approvals, close/reversal, FX snapshots |
+| 0015 | restricted records | health/safeguarding/custody/legal | Separate restricted schema/domain | restricted role, reason audit, no portal/public/search leakage |
+| 0016 | optional services | library, transport, boarding, meals, clubs, trips | Tenant + service assignment | consent/capacity/eligibility; module entitlement |
+| 0017 | SaaS billing | XEN plans/pricing/subscriptions/usage/entitlements | Platform billing domain | contract snapshot, dedupe, separation from school ledger |
+| 0018 | documents/support/governance | retention, requests, service desk, jobs, webhooks, backup inventory | Tenant-private + platform ops | privacy controls, access audit, hold, idempotent jobs |
+| 0019 | localization/region | translation/config/residency/jurisdiction | Global + tenant configuration | locale/currency/date/region checks and privacy review |
+
+## 8. Cross-domain dependency and cycle handling
+
+- The tenant root and identity/authorization must precede all tenant-owned domains; security/RLS must be applied as soon as a table is exposed, not deferred to a later “security migration”.
+- File metadata precedes records that attach files. Store references nullable only where the business relationship is optional; later migrations add constraints for cross-domain cycles (e.g., profile photo, CMS domain, converted admissions record). Do not resolve a cycle with unchecked IDs.
+- Admissions conversion references students/enrolments created in the academics/people domain and is transactional/idempotent; admission payment records remain distinct from school tuition payments until an explicitly approved transfer/allocation workflow.
+- Assessment may optionally depend on attendance for reporting; avoid a hard FK cycle. Reports consume approved snapshots/read models.
+- CMS publication tables depend on website authoring/version structures; public API/read projection is separate and allow-listed. Private forms/submissions never enter the public projection.
+- School finance core precedes advanced accounting. Accounting journal references are domain-local; school ledger and XEN subscription ledger must not share tables or posting routines.
+- Restricted schema links to students through tenant-safe references, but access is not inherited from ordinary student permissions. Metadata visible to other modules must be minimized.
+- Optional modules depend on core people/enrolment, file metadata, and (where fee charging is enabled) finance; they are not blockers for the first pilot.
+
+## 9. Release and approval status
+
+The manifest is a proposed dependency sequence. No migration IDs are assigned to actual files, no migrations have been created or run, and no executable schema, seed data, CI, infrastructure or deployment was changed. Scope, provider/legal/privacy, RPO/RTO and role/RLS review items remain open. Implementation requires separate explicit authorization.
