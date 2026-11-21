@@ -1,6 +1,6 @@
 # Schema Blueprint — XEN SCHOOL MANAGEMENT v3.0
 
-**Status:** Documentation proposal for review; not implemented. **Scope:** PostgreSQL logical design, tenant isolation, classification and policy intent. This document is subordinate to the Complete Combined Master Plan v3.0, data dictionaries, relationship specification, constraints/RLS specification, all 13 accepted decisions, and implementation roadmap. It does not authorize SQL or code.
+**Status:** Logical schema proposal for review; not a production schema. The live project has a bootstrap database (see live-project-bootstrap-status.md); this document is not a claim that the normalized blueprint is implemented. **Scope:** PostgreSQL logical design, tenant isolation, classification and policy intent. This document is subordinate to the Complete Combined Master Plan v3.0, data dictionaries, relationship specification, constraints/RLS specification, all 13 accepted decisions, and implementation-roadmap.md. It does not authorize SQL or code.
 
 ## 1. Architectural rules
 
@@ -59,11 +59,11 @@ Classify each row and sensitive field. Public website content must never be popu
 | role_permissions | id | role_id scope | FK role/permission; unique pair | P1 | Role-admin only |
 | membership_roles | id | school_id | membership, role, campus/scope IDs tenant-safe; validity range | P2 | Grantor permission; cannot self-escalate |
 | platform_roles | id | none | profile/role; valid period; grant/revoke audited | P3 | Only authorized platform security admins |
-| platform_settings | id/key | none | unique key; typed/versioned values | P1/P3 by setting | Platform admin; secrets excluded |
+| platform_settings (proposed; dictionary sync required) | id/key | none | unique key; typed/versioned values | P1/P3 by setting | Platform admin; secrets excluded |
 | audit_logs | id | nullable school_id | actor, event, resource, timestamp; append-only | P3 | Audit readers; append-only service |
 | security_events | id | nullable school_id | event type, severity, actor/target, safe metadata | P3 | Security operators, append-only |
 | consent_records | id | school_id nullable | subject type/id validation; consent version/purpose/scope; withdrawal | P2/P3 | Subject/guardian where lawful; privacy staff |
-| platform_access_grants | id | nullable school_id | operator, purpose, scope, start/end, approval | P3 | Explicit time-bound support access; every use audited |
+| platform_access_grants (proposed; dictionary sync required) | id | nullable school_id | operator, purpose, scope, start/end, approval | P3 | Explicit time-bound support access; every use audited |
 
 ### B. People, guardians, enrolment and HR
 
@@ -82,7 +82,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | staff_departments | id | school_id | unique code; head staff FK | P1/P2 | Staff administration |
 | staff_department_memberships | id | school_id | staff/department; valid period | P2 | HR/admin |
 | teacher_assignments | id | school_id | staff/class/subject/year; scope and date checks | P2 | Teacher and academic admins scoped |
-| enrolment_history/events | id | school_id | enrolment FK; transition/event; actor; before/after safe snapshot | P2 | Registrar; append-only |
+| enrolment_history/events (proposed; dictionary sync required) | id | school_id | enrolment FK; transition/event; actor; before/after safe snapshot | P2 | Registrar; append-only |
 
 ### C. Academics and flexible calendar
 
@@ -145,7 +145,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | admission_application_fee_snapshots | id | school_id | application; fee config/version and assessed terms; waiver/amount snapshot | P2 | Admissions/bursar |
 | admission_payments | id | school_id | application/fee snapshot; amount/currency; idempotency; verified | P2 | Bursar/admissions split permissions |
 | admission_payment_refunds | id | school_id | original payment; refund cap; approval/status | P2/P3 | Finance approver; audited |
-| admissions_conversion_log | id | school_id | application/student/enrolment; unique conversion key | P2 | Registrar/admin; append-only |
+| admissions_conversion_log (proposed; dictionary sync required) | id | school_id | application/student/enrolment; unique conversion key | P2 | Registrar/admin; append-only |
 
 ### F. School finance (distinct ledger domain)
 
@@ -225,7 +225,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | portal_access_logs | id | school_id | user/time/outcome | P3 | Security/audit |
 | portal_device_tokens | id | school_id | encrypted token; unique active; revoked | P3/P4 | Token service; self manage |
 | announcements | id | school_id | audience scope validated; status/time | P1/P2 | Author and audience only |
-| announcement_recipients (recommended) | id | school_id | announcement/user; unique; delivery/read state | P2 | Recipient and authorized comms staff |
+| announcement_recipients (recommended; dictionary sync required) | id | school_id | announcement/user; unique; delivery/read state | P2 | Recipient and authorized comms staff |
 | message_threads | id | school_id | participant set; related student restricted | P2 | Participants only |
 | messages | id | school_id | thread; sender; moderation/edit history | P2 | Thread participant; moderator scoped |
 | message_recipients | id | school_id | thread/user unique active; thread-level read state | P2 | Participant only |
@@ -239,58 +239,74 @@ Classify each row and sensitive field. Public website content must never be popu
 
 ### I. Optional services
 
-| Table group / tables | Key relationship/constraints | Class/lifecycle | RLS intent |
-|---|---|---|---|
-| library_categories, library_books, library_book_copies | tenant-safe parent links; ISBN/accession uniqueness; copy status | P1; available/on-loan/reserved/lost/repair/retired | Library role; borrower own limited |
-| library_loans, library_reservations, library_fines | exactly one borrower; one active loan/copy; due/renewal checks; fines currency | P2 | Librarian; student/guardian own allowed |
-| transport_vehicles, transport_routes, transport_route_stops | route/vehicle/campus; stop sequence unique; capacity/inspection | P1/P2; active/retired | Transport role |
-| student_transport_assignments | enrolment/route/stop same route; effective dates | P2 | Transport; guardian own child |
-| transport_incidents | student/vehicle/route links; restricted narrative | P3 | Designated safety role only |
-| boarding_houses, boarding_rooms, boarding_assignments | capacity; dates; house/room same tenant | P1/P2 | Boarding staff |
-| meal_plans, meal_orders, meal_attendance | dates, student assignment, dietary restrictions separate restricted info | P2/P3 | Catering limited; sensitive dietary detail restricted |
-| clubs, activities, activity_memberships | staff/student scope; capacity; consent | P1/P2 | Activity staff; guardian own |
-| trips, trip_permissions, trip_attendance | dates, permission/consent, emergency contact | P2/P3 | Trip lead and guardian own |
-| service_incidents | typed service/student references; restricted details | P3 | Need-to-know; audit |
+| Table | PK | Tenant key | Key FKs / constraints / indexes | Class / lifecycle | RLS intent |
+|---|---|---|---|---|---|
+| library_categories | id | school_id | parent category; unique school/code; prevent cycles | P1; active/inactive | Librarian/admin |
+| library_books | id | school_id | category; optional cover file; title/ISBN search | P1; catalogued/active/retired | Librarian; safe catalogue view |
+| library_book_copies | id | school_id | book; optional campus; unique accession | P1; available/on-loan/reserved/lost/repair/retired | Librarian |
+| library_loans | id | school_id | copy; exactly one student/staff borrower; issuer | P2; issued/overdue/returned/cancelled; one active loan/copy | Librarian; borrower own limited |
+| library_reservations | id | school_id | book; exactly one student/staff requester; fulfilled copy | P2; requested/queued/ready/fulfilled/cancelled/expired | Librarian; requester own |
+| library_fines | id | school_id | loan; exact amount/currency; waiver approver | P2/P3; assessed/waived/paid/void | Librarian/finance split |
+| transport_vehicles | id | school_id | campus; capacity > 0; unique registration | P2; active/maintenance/inactive/retired | Transport manager |
+| transport_routes | id | school_id | year; vehicle; transport_driver; unique route/year | P1/P2; draft/active/paused/retired | Transport scope |
+| transport_stops | id | school_id | stop location; coordinates validated; location index review | P2/P3; active/inactive | Transport; location notes restricted |
+| transport_route_stops | id | school_id | route; stop; unique route/sequence; planned time | P2 | Transport |
+| transport_drivers | id | school_id | optional staff; encrypted licence; expiry/status index | P3; active/inactive/suspended | Transport/HR split |
+| transport_assignments | id | school_id | enrolment; route; stop; optional guardian link; stop belongs to route | P2; planned/active/ended/cancelled | Transport; guardian own child only |
+| transport_incidents | id | school_id | optional route/vehicle/student; restricted narrative; resolution audit | P3; reported/investigating/resolved/closed | Designated safety staff |
+| boarding_houses | id | school_id | campus; unique house code; capacity | P1/P2; active/inactive | Boarding admin |
+| boarding_rooms | id | school_id | house; unique room code/house; capacity | P1/P2; active/inactive | Boarding staff |
+| boarding_assignments | id | school_id | enrolment; room; date overlap and capacity validation | P2; planned/active/ended/cancelled | Boarding staff; guardian limited |
+| meal_plans | id | school_id | price_minor/currency; effective dates; unique plan code | P1; draft/active/retired | Catering/finance split |
+| meal_orders | id | school_id | enrolment; plan; date eligibility; restricted dietary notes | P2/P3; pending/confirmed/cancelled/served | Catering; dietary detail restricted |
+| meal_attendance | id | school_id | order optional; enrolment; unique enrolment/date/meal type | P2; present/absent/late/other | Catering scope |
+| clubs | id | school_id | staff lead; unique club code; capacity | P1; active/inactive | Activity admin |
+| activities | id | school_id | lead staff; dates; capacity; permission flag | P2; planned/open/completed/cancelled | Activity staff |
+| activity_memberships | id | school_id | activity; enrolment; unique active; consent/capacity | P2; pending/active/ended/cancelled | Activity staff; guardian own child |
+| trips | id | school_id | lead staff; date range; status | P2; planned/open/completed/cancelled | Trip lead |
+| trip_permissions | id | school_id | trip; enrolment; verified guardian link; evidence file | P3; pending/approved/declined/revoked | Trip lead; guardian own permission |
+| trip_attendance | id | school_id | trip; enrolment; unique trip/enrolment | P2/P3; present/absent/late/other | Trip lead; restricted notes |
 
 ### J. Documents, support and platform operations
 
 | Table | PK | Tenant key | Key FKs / constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|---|
-| document_categories | id | school_id | unique code; retention policy | P1 | Document admin |
-| document_records | id | school_id | owner/type; classification; lifecycle | P2/P3 | Explicit permissions |
-| document_versions | id | school_id | document/file; version unique; checksum; scan status | P2/P3 | Authorized readers; quarantined denied |
-| document_permissions | id | school_id | document/subject/permission/scope; validity | P3 | Grantor authorized; prevent self-grant |
-| document_access_logs | id | school_id | actor/document/action/time; append-only | P3 | Security/audit |
-| retention_rules | id | school_id nullable | category, duration, legal basis, holds | P3 | Privacy/compliance |
-| data_export_requests | id | school_id nullable | requester/scope/verification/approval/status | P3 | Privacy admin; requester status only |
-| data_deletion_requests | id | school_id nullable | identity verification, scope, legal hold, outcome | P3 | Privacy admin |
-| support_tickets | id | school_id nullable | requester/category/priority/status | P2/P3 | Requester + assigned support |
-| support_ticket_messages | id | school_id nullable | ticket; public/internal visibility; attachments | P2/P3 | Internal notes hidden from requester |
-| support_ticket_assignments | id | school_id nullable | ticket/agent/valid interval | P2 | Support |
-| support_ticket_history | id | school_id nullable | from/to/actor/time; append-only | P2/P3 | Support and requester-safe history |
-| system_jobs | id | nullable school_id | job key/idempotency/status/schedule | P3 | Operations |
-| job_failures | id | nullable school_id | job/error sanitized/retry | P3 | Operations |
-| webhook_events | id | nullable school_id | provider/event ID unique; signature status; sanitized payload | P3 | Integration operators |
-| backup_inventory/recovery_events | id | nullable school_id | backup metadata and recovery verification | P3 | Operations/security |
-| file_metadata | id | school_id nullable | object key unique; size/MIME/scan/classification; owner | P2/P3 | Metadata and storage policy; public approved only |
+| document_categories | id | school_id | unique code; sensitivity; retention-rule reference | P1; active/inactive | Document admin |
+| documents | id | school_id | category; files; validated typed owner reference | P2/P3; draft/active/archived/expired | Explicit permission; restricted categories separate |
+| document_versions | id | school_id | document; file; unique version; checksum/scan | P2/P3; uploaded/quarantined/clean/rejected/archived | Authorized readers; quarantine denied |
+| document_permissions | id | school_id | document/principal/scope; validity; no public restricted grant | P3; active/expired/revoked | Grantor authorized; no self-grant |
+| document_access_logs | id | school_id | document/actor/action/time; append-only | P3 | Security/audit |
+| document_retention_rules | id | school_id nullable | category; duration/action; legal hold overrides deletion | P3; active/reviewed/retired | Privacy/compliance |
+| data_export_requests | id | school_id nullable | requester/scope/verification/approval/status | P3; submitted/verified/approved/processing/completed/failed/rejected/expired | Privacy admin; requester status only |
+| data_deletion_requests | id | school_id nullable | subject verification, scope, legal hold and outcome | P3; submitted/verified/review/approved/held/completed/rejected | Privacy admin |
+| support_tickets | id | school_id nullable | requester user/guardian; category; unique ticket number; priority/status | P2/P3; new/open/in-progress/waiting/resolved/closed | Requester + assigned support |
+| ticket_categories | id | school_id nullable | platform or tenant category; unique scope/code; default priority | P1; active/inactive | Support admin |
+| ticket_messages | id | school_id nullable | ticket/sender; requester/internal visibility | P2/P3 | Internal notes hidden from requester |
+| ticket_assignments | id | school_id nullable | ticket/assignee/grantor; assignment interval history | P2 | Support |
+| ticket_attachments | id | school_id nullable | ticket/message/files; scan-clean requirement | P2/P3 | Visibility follows ticket/message |
+| ticket_status_history | id | school_id nullable | ticket/actor/from-to/time; append-only | P2/P3; transition history | Support and requester-safe history |
+| system_jobs | id | nullable school_id | job key/idempotency/status/schedule | P3; queued/running/succeeded/failed/cancelled | Operations |
+| job_failures | id | nullable school_id | job/error sanitized/retry | P3; retryable/resolved | Operations |
+| webhook_logs | id | nullable school_id | provider/event ID unique; signature status; safe payload | P3; received/verified/processed/failed | Integration operators |
+| backup_records | id | none | environment/storage reference; checksum/retention/restore test | P3; pending/running/completed/failed/restore-tested/expired | Operations/security |
+| login_activity | id | nullable school_id | user/time/result/method; IP hash; retention | P3; success/failure/challenge | Security only |
+| files | id | school_id nullable | object key unique; size/MIME/checksum/scan/classification | P2/P3; uploaded/quarantined/scanning/clean/rejected/archived/deleted | Metadata/storage policy; approved public assets only |
 
 ### K. XEN SaaS billing (separate platform ledger)
 
 | Table | PK | Tenant key | Key FKs / constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|---|
-| subscription_plans | id | none | plan key/version; active catalog | P1 | Platform commercial admin; public catalog safe |
-| subscription_features | id | none | plan/feature unique; quota/config | P1 | Platform admin |
-| billing_customers | id | school_id | school/provider customer ID unique | P2 | XEN billing only; school sees own |
-| school_subscriptions | id | school_id | plan; contract snapshot; period/status; history | P2 | XEN billing admin; tenant own billing view |
-| subscription_items | id | school_id | subscription/feature/quantity; effective dates | P2 | Billing |
-| subscription_invoices | id | school_id | invoice number unique; currency; immutable posted | P2 | XEN billing only |
-| subscription_payments | id | school_id | invoice/provider; idempotency; verified state | P2 | XEN billing only |
-| subscription_events | id | school_id | subscription; transition history append-only | P2/P3 | Billing audit |
-| usage_records | id | school_id | feature/period/dedupe; quantity | P2 | Billing/tenant usage read |
-| promotions | id | none or platform | code/status/validity/limits | P1 | Commercial admin |
-| promotion_redemptions | id | school_id | promotion/subscription/invoice; unique redemption key | P2 | Billing |
-
-**No shared tables or identifiers with school invoices/payments.** SaaS plan charges must not be posted into a school's tuition ledger. Only explicitly designed settlement reports may cross the boundary.
+| subscription_plans | id | none | unique plan key/version; effective price snapshot | P1; draft/active/retired | Platform commercial admin; public catalog safe |
+| subscription_features | id | none | plan/feature unique; quota/config validated | P1 | Platform billing admin |
+| billing_customers | id | school_id | school/provider customer; unique provider reference; encrypted tax identifier | P2 | XEN billing; school own view only |
+| school_subscriptions | id | school_id | school/plan; contract snapshot; period/status history | P2; trial/active/past_due/grace/suspended/cancelled/expired | XEN billing; tenant own subscription view |
+| subscription_items | id | school_id | subscription/feature/quantity; price/currency snapshot | P2; active/ended | Billing |
+| subscription_invoices | id | school_id | subscription; unique invoice number; exact totals; immutable posted | P2; draft/issued/paid/overdue/void | XEN billing only |
+| subscription_payments | id | school_id | invoice/provider; idempotency; verified state | P2; pending/verified/failed/reversed/refunded | XEN billing only |
+| subscription_events | id | school_id | subscription; append-only transition history | P2/P3 | Billing audit |
+| usage_records | id | school_id | feature/period/dedupe; quantity | P2; recorded/aggregated | Billing/tenant usage view |
+| platform_promotions | id | none | unique promo code; validity/limits/value/currency | P1; draft/active/expired/suspended | Platform commercial admin |
+| promotion_redemptions (proposed) | id | school_id | promotion/subscription/invoice; unique redemption/idempotency key | P2; pending/redeemed/reversed | XEN billing; tenant own history |
 
 ## L. Restricted health and safeguarding
 
@@ -435,21 +451,21 @@ This supplement is a review aid to make table-level decisions testable. The deta
 
 ### 13.2 Table-group review map
 
-| Table group / entities (see Section 4 for inventory) | Proposed key relationship pattern | Required constraints / indexes | Class / lifecycle | RLS policy intent |
+| Table group / entities (see Section 4 and the table-level review addendum) | Proposed key relationship pattern | Required constraints / indexes | Class / lifecycle | RLS policy intent |
 |---|---|---|---|---|
-| Platform/tenant: schools, campuses, profiles, memberships, roles, permissions, audit, platform grants | Tenant root; global profile/auth; role scope explicit; membership unique per active school/user | School slug; campus code; membership status; scoped role grants; append-only audit | P1/P2/P3; tenant onboarding/suspension/closure; memberships invited/active/suspended/ended | Tenant context resolved server-side; self profile; admin only scoped membership/roles; platform grants time-bound and audited |
-| People/guardian/student/staff: students, guardians, guardian links, restrictions, emergency contacts, enrolments, staff/HR | Same-school composites; global user profile links exception; explicit guardian bridge and enrolment history | School-local IDs; active verified guardian link; restriction dates/review; primary enrolment uniqueness in approved context; overlap rules; staff assignment indexes | P2; HR/legal/restriction P3; active/ended histories | Staff by permission/scope; guardians only verified active links and permitted fields; restrictions override; HR/restricted fields separated |
-| Academic/calendar/timetable: programmes, calendars, years, terms, events, periods, rooms, timetables, grades/classes/streams/subjects/assignments | Same school; calendar/year/class subject/assignment links validated; timetable versions | Calendar/year date consistency; overlap policy; current year; capacity; teacher/class/room clash; version/effective date indexes | P1/P2; planned/open/closed; draft/approved/published/retired timetable | Academic admins; teachers only assigned classes/subjects; public calendar events only via publication projection |
-| Attendance: sessions, records, corrections, notification records | Session/student and same-school class/enrolment scope | Unique session/student; date eligibility; allowed status; late duration nonnegative; correction reasons and history | P2; draft/submitted/approved/locked; corrections append-only | Class/teacher scope; guardian sees linked child only after allowed release; notifications minimal and logged |
-| Assessment/results: schemes/versions, scales, promotion, periods, assessments/components, marks/moderation/results/report cards | Same school and eligible enrolment/class-subject on date; snapshot FK | score bounds, weight totals, version/effective date, unique student/component, publication snapshot uniqueness | P2; assessment workflow; published immutable snapshot | Assigned teacher write; moderation/approval separated where configured; learner/guardian published-only filtered access |
-| Admissions: campaign, application, applicant/guardian, documents, review/interview/offer/history, fee snapshots/payment/refunds/conversion | Application graph same school; files scoped; converted student/enrolment links; idempotent conversion | Unique reference; campaign date/grade; transitions; fee version snapshot; payment idempotency; refund cap; conversion key | P2/P3; campaign and application workflow; reviews append-only | Public only campaign and controlled submission endpoint; staff assigned role; sensitive notes/payment controls separated |
-| School finance: fees, structures/items, assignments, invoice/items, payments/allocations/receipts, discounts/bursary, refund/credit, bank and accounting | School finance schema/domain; same school; payment/invoice currency; accounting references | Unique invoice/receipt/ref/provider/idempotency; exact amounts; posting immutability; allocation caps; approvals; balanced journals; closed periods | P2/P3; draft/posted/part-paid/paid/void/reversed/refunded; immutable posting | Finance permission family; segregation of duties; guardian only approved own linked balances/receipts; never SaaS billing |
-| Public CMS/web: website/theme/pages/versions/blocks/navigation/media/articles/events/domains/translations/publications/forms/submissions | Tenant-private authoring; separate public projection and publication-version reference; public domain global uniqueness | normalized verified domain; unique website/locale/slug; version integrity; component allowlist; publication/unpublish; submissions private/rate-limited | Authoring P1/P2; published approved P0 only; submissions P2 | Anonymous only safe published projection/media. Base authoring, drafts, submissions and private file metadata never anonymous; publisher permissions + approval |
-| Portals/communication: preferences, notifications, threads/messages/recipients/read receipts/moderation/delivery | Tenant-safe participant/recipient relations; files scoped; provider events/idempotent | Unique recipient/read receipt; delivery idempotency; message state; moderation history; rate limits | P2/P3 where sensitive; queued/sent/failed/read/removed per workflow | Participants only; guardian relationship permissions; moderation roles; internal notes hidden; message content not in logs |
-| Optional services: library, transport, boarding, meals, clubs, activities/trips | Tenant-safe; assignments link eligible enrolment; service-specific bridges | Capacity, consent, dated eligibility, route-stop ordering, book-copy/loan uniqueness, fees if finance-integrated | P1/P2; service-specific statuses | Module role and assignment scope; sensitive incidents segregated; guardian field-filtered access |
-| Restricted health/safeguarding/legal: health profiles, incidents/cases, custody/legal orders and restriction records | Separate restricted schema; same school; link IDs via composite FK; minimal metadata outside restricted domain | Need-to-know; case/record scope; review dates; legal holds; access audit; no broad search/export | P3; open/review/closed/restricted/retained per policy | Dedicated role keys, deny by default, access reason/audit, no guardian/student/public/API exposure unless approved per-record and legally permitted |
-| Documents/support/governance: files, categories, access logs, retention, export/delete, service desk, jobs/webhooks/audit/backups | Tenant-scoped metadata; opaque storage object key; platform operational tables separate | Unique object key; scan/clean gate; checksum/size; idempotency; hold prevents deletion; append-only access/audit | P2/P3; quarantine/clean/rejected/archived; governance request workflow | Private file access after authorization; service desk requester vs internal notes; operations limited; audit readers only |
-| XEN SaaS billing: plan catalog, pricing versions, subscriptions, invoices, payments, entitlements, usage | Platform billing namespace; tenant reference to school; no FK into school ledger; contract snapshot | Unique subscription/provider reference/usage dedupe; pricing snapshot; state machine; usage period | Platform P2/P3; trial/active/past_due/grace/suspended/cancelled/expired | XEN billing roles; school owner sees own SaaS subscription only; no cross-tenant records; segregated from school fees |
+| Platform/tenant: schools, campuses, profiles, memberships, roles, permissions, settings, platform grants, audit, security, login | Tenant root; global profile/auth; role scope explicit; membership unique per active school/user | School slug; campus code; membership status; scoped grants; append-only audit | P1/P2/P3; onboarding/trial/active/suspended/closed; invited/active/suspended/ended | Tenant context resolved server-side; self profile; admin only scoped membership/roles; platform grants time-bound/audited |
+| People/guardian/enrolment/HR | Same-school composites; global profile link exception; explicit guardian bridge and enrolment history | School-local IDs; verified guardian; legal restrictions/review; primary enrolment; overlap rules; staff assignment indexes | P2; HR/legal P3; active/ended histories | Staff by permission/scope; guardian only verified link and permitted fields; restrictions override; HR/restricted fields separate |
+| Academic/calendar/timetable | Same school; calendar/year/class-subject/assignment links validated; timetable versions | Date/overlap policy; current year; capacity; teacher/class/room clashes; version/effective-date indexes | P1/P2; planned/open/closed; draft/approved/published/retired timetable | Academic admin; teachers only assigned classes/subjects; public events only via approved projection |
+| Attendance | Tenant-safe session/student/class scope | Unique session/student; date eligibility; allowed status; late duration; correction reason/history | P2; draft/submitted/approved/locked; corrections append-only | Class/teacher scope; guardian linked child only after allowed release; notifications minimal |
+| Assessment/results | Tenant-safe scheme/assessment/student and eligible enrolment/class subject; snapshots | Score bounds, weight totals, version/effective date, unique student/component, publication snapshot | P2; assessment workflow; published immutable snapshot | Assigned teacher write; moderation/approval separated; learner/guardian published-only |
+| Admissions | Application graph same school; files scoped; converted student/enrolment links | Unique reference; campaign dates/grade; transitions; fee snapshot; payment idempotency; refund cap; conversion key | P2/P3; campaign/application workflow; history append-only | Public safe campaign/submission endpoint; staff assigned role; payment controls separated |
+| School finance | School-finance domain; same school; payment/invoice currency; accounting references | Invoice/receipt/provider/idempotency uniqueness; exact amounts; immutable posting; allocation caps; approvals | P2/P3; draft/posted/part-paid/paid/void/reversed/refunded | Finance permissions; segregation of duties; guardian own approved balance/receipt only; never SaaS billing |
+| Public CMS/web | Tenant-private authoring; public projection/publication-version reference; verified domain | Normalized domain; website/locale/slug uniqueness; allow-listed components; publication/unpublish/cache invalidation | Authoring P1/P2; approved published P0 only | Anonymous only safe projection/media; drafts/submissions/private files never anonymous |
+| Portals/communications | Tenant-safe participants/recipients; files scoped; provider events idempotent | Unique recipients/read receipts; delivery dedupe; moderation history; rate limits | P2/P3; queued/sent/failed/read/removed | Participants only; guardian relation; moderator scope; internal notes hidden; no sensitive payload in logs |
+| Optional services: library, transport, boarding, meals, clubs, activities, trips | Tenant-safe; assignments link eligible enrolment; service bridges | Capacity, consent, dates, route-stop, book-copy/loan uniqueness; fee integration explicit | P1/P2/P3 incidents; module-specific states | Module role and assignment scope; incidents restricted; guardian field-filtered |
+| Restricted health/safeguarding/legal | Restricted domain/schema; same school; composite student link; minimal metadata | Need-to-know; case scope; review dates; legal holds; access audit; no broad search/export | P3; open/review/closed/retained per policy | Dedicated role keys; deny by default; reason audit; no portal/public exposure |
+| Documents/support/governance/operations | Tenant metadata and opaque object keys; platform operations separated | Scan/clean; hold prevents deletion; ticket visibility; append-only access/history; job/webhook idempotency | P2/P3; quarantine/clean/rejected; request workflows | Private file access after authorization; internal notes hidden; operations limited; audit readers |
+| XEN SaaS billing | Platform billing namespace; school reference; no FK to school ledger | Unique provider/invoice/usage dedupe; contract snapshot; state machine | P1/P2/P3; trial/active/past_due/grace/suspended/cancelled/expired | XEN billing roles; school owner own billing view only; no cross-tenant; separate from school fees |
 
 ### 13.3 Public website/private-record segregation
 
@@ -461,7 +477,7 @@ School finance and XEN subscription billing use distinct namespaces, table sets,
 
 ### 13.5 Final review blockers (must close before executable schema)
 
-- Reconcile the complete entity list to the authoritative master plan and table data dictionaries; confirm no orphaned/duplicate entities or missing FK paths.
+- Reconcile the complete entity list to the authoritative master plan and canonical data-dictionary names; review the [table-level reconciliation](schema-blueprint-table-level-review.md), supplemental entities, duplicates and missing FK paths.
 - For each table, review the concrete FK columns, unique constraints, check constraints, ON DELETE actions, RLS policy and API exposure against query/use cases.
 - Approve scope/permissions for campuses, class/subject grants, guardian permissions, student portal (future), school groups (future), and platform support grants.
 - Resolve finance ledger/posting/reversal, currency precision/rounding, Zimbabwe tender/currency configuration and payment-provider evidence.
@@ -469,3 +485,10 @@ School finance and XEN subscription billing use distinct namespaces, table sets,
 - Confirm database region/tier/version, extensions, Auth, storage, backup/PITR, RPO/RTO, restore drill, operational limits and costs.
 - Pilot owners validate workflows and proposed first-release scope; product owner accepts requirements/exit criteria.
 - Separate implementation approval is required. No SQL or executable migration can begin from this document alone.
+
+
+## 14. Canonical table-name and live-baseline reconciliation
+
+The table-level supplement records canonical names and expands service/support/operations rows that were previously grouped. The dictionaries have 207 distinct canonical table names after removing one empty duplicate grade_levels heading. Previous blueprint aliases are reconciled (transport_assignments, documents, document_retention_rules, ticket_messages, ticket_assignments, ticket_status_history, files, webhook_logs, backup_records and platform_promotions). Supplemental entities remain proposed until dictionary review.
+
+The current live bootstrap has 13 applied migration-history entries and 209 public tables with RLS enabled. Optional services and several document/support/operations tables are live scaffolds using flexible record_data JSONB placeholders; the approved dictionaries describe the target normalized design. This blueprint is not a claim that those live tables are normalized, policy-complete or reproducible. Reconcile and validate the exact live baseline before SQL implementation.
