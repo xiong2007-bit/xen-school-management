@@ -62,7 +62,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | platform_settings (proposed; dictionary sync required) | id/key | none | unique key; typed/versioned values | P1/P3 by setting | Platform admin; secrets excluded |
 | audit_logs | id | nullable school_id | actor, event, resource, timestamp; append-only | P3 | Audit readers; append-only service |
 | security_events | id | nullable school_id | event type, severity, actor/target, safe metadata | P3 | Security operators, append-only |
-| consent_records | id | school_id nullable | subject type/id validation; consent version/purpose/scope; withdrawal | P2/P3 | Subject/guardian where lawful; privacy staff |
+| consent_records | id | school_id | subject type/id validation; consent version/purpose/scope; withdrawal | P2/P3 | Subject/guardian where lawful; privacy staff |
 | platform_access_grants (proposed; dictionary sync required) | id | nullable school_id | operator, purpose, scope, start/end, approval | P3 | Explicit time-bound support access; every use audited |
 
 ### B. People, guardians, enrolment and HR
@@ -248,7 +248,7 @@ Classify each row and sensitive field. Public website content must never be popu
 | library_reservations | id | school_id | book; exactly one student/staff requester; fulfilled copy | P2; requested/queued/ready/fulfilled/cancelled/expired | Librarian; requester own |
 | library_fines | id | school_id | loan; exact amount/currency; waiver approver | P2/P3; assessed/waived/paid/void | Librarian/finance split |
 | transport_vehicles | id | school_id | campus; capacity > 0; unique registration | P2; active/maintenance/inactive/retired | Transport manager |
-| transport_routes | id | school_id | year; vehicle; transport_driver; unique route/year | P1/P2; draft/active/paused/retired | Transport scope |
+| transport_routes | id | school_id | year; vehicle; transport_drivers; unique route/year | P1/P2; draft/active/paused/retired | Transport scope |
 | transport_stops | id | school_id | stop location; coordinates validated; location index review | P2/P3; active/inactive | Transport; location notes restricted |
 | transport_route_stops | id | school_id | route; stop; unique route/sequence; planned time | P2 | Transport |
 | transport_drivers | id | school_id | optional staff; encrypted licence; expiry/status index | P3; active/inactive/suspended | Transport/HR split |
@@ -276,15 +276,15 @@ Classify each row and sensitive field. Public website content must never be popu
 | document_versions | id | school_id | document; file; unique version; checksum/scan | P2/P3; uploaded/quarantined/clean/rejected/archived | Authorized readers; quarantine denied |
 | document_permissions | id | school_id | document/principal/scope; validity; no public restricted grant | P3; active/expired/revoked | Grantor authorized; no self-grant |
 | document_access_logs | id | school_id | document/actor/action/time; append-only | P3 | Security/audit |
-| document_retention_rules | id | school_id nullable | category; duration/action; legal hold overrides deletion | P3; active/reviewed/retired | Privacy/compliance |
-| data_export_requests | id | school_id nullable | requester/scope/verification/approval/status | P3; submitted/verified/approved/processing/completed/failed/rejected/expired | Privacy admin; requester status only |
+| document_retention_rules | id | school_id | category; duration/action; legal hold overrides deletion | P3; active/reviewed/retired | Privacy/compliance |
+| data_export_requests | id | school_id | requester/scope/verification/approval/status | P3; submitted/verified/approved/processing/completed/failed/rejected/expired | Privacy admin; requester status only |
 | data_deletion_requests | id | school_id nullable | subject verification, scope, legal hold and outcome | P3; submitted/verified/review/approved/held/completed/rejected | Privacy admin |
-| support_tickets | id | school_id nullable | requester user/guardian; category; unique ticket number; priority/status | P2/P3; new/open/in-progress/waiting/resolved/closed | Requester + assigned support |
-| ticket_categories | id | school_id nullable | platform or tenant category; unique scope/code; default priority | P1; active/inactive | Support admin |
-| ticket_messages | id | school_id nullable | ticket/sender; requester/internal visibility | P2/P3 | Internal notes hidden from requester |
-| ticket_assignments | id | school_id nullable | ticket/assignee/grantor; assignment interval history | P2 | Support |
-| ticket_attachments | id | school_id nullable | ticket/message/files; scan-clean requirement | P2/P3 | Visibility follows ticket/message |
-| ticket_status_history | id | school_id nullable | ticket/actor/from-to/time; append-only | P2/P3; transition history | Support and requester-safe history |
+| support_tickets | id | school_id | requester user/guardian; category; unique ticket number; priority/status | P2/P3; new/open/in-progress/waiting/resolved/closed | Requester + assigned support |
+| ticket_categories | id | school_id | unique school/code; default priority | P1; active/inactive | Support admin |
+| ticket_messages | id | school_id | ticket/sender; requester/internal visibility | P2/P3 | Internal notes hidden from requester |
+| ticket_assignments | id | school_id | ticket/assignee/grantor; assignment interval history | P2 | Support |
+| ticket_attachments | id | school_id | ticket/message/files; scan-clean requirement | P2/P3 | Visibility follows ticket/message |
+| ticket_status_history | id | school_id | ticket/actor/from-to/time; append-only | P2/P3; transition history | Support and requester-safe history |
 | system_jobs | id | nullable school_id | job key/idempotency/status/schedule | P3; queued/running/succeeded/failed/cancelled | Operations |
 | job_failures | id | nullable school_id | job/error sanitized/retry | P3; retryable/resolved | Operations |
 | webhook_logs | id | nullable school_id | provider/event ID unique; signature status; safe payload | P3; received/verified/processed/failed | Integration operators |
