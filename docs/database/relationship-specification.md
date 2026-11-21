@@ -20,6 +20,7 @@
 - `school_memberships N—M roles` via `membership_roles`; each assignment may be scoped to campus/class/subject with a scope type and ID.
 - `roles N—M permissions` via `role_permissions`. Platform role assignments are separate through `platform_roles`.
 - Global role records may be shared; tenant custom roles must belong to that tenant.
+- platform_access_grants is a proposed support-access bridge; if approved, it links platform operator, optional tenant scope, purpose, approver, start/end and revocation, and never grants unbounded data access.
 
 ## B. People and school relationships
 
@@ -118,31 +119,34 @@
 
 ## J. Additional services
 
-- `library_categories 1—N library_books`; books have copies. Copies have loan history; loans have optional fine records; reservations are for title/book and fulfilled by a copy.
-- `transport_routes 1—N transport_route_stops`; each row references a stop and sequence. Route optionally uses vehicle and driver. Students' enrolments have route assignments to a stop on the route.
-- `boarding_houses 1—N boarding_rooms`; enrolments have dated room assignments with capacity and overlap validation.
-- `meal_plans 1—N meal_orders`; enrolments may have meal orders/attendance. Dietary data is restricted.
-- `clubs/activities 1—N activity_memberships`; memberships reference enrolments, consent and capacity.
-- `trips 1—N trip_permissions, trip_attendance`; permissions are guardian-authority checked, and attendance is recorded per enrolment.
-- Transport incidents may reference route/vehicle/student but remain restricted.
-- Document categories group documents; document versions reference files; document permissions grant scoped access; access logs record use; retention rules govern expiry.
-- Support tickets have messages, assignments, attachments and status history. Internal ticket messages are not visible to requester.
+- library_categories 1—N library_books; books have library_book_copies. Copies have loan history; library_loans have optional library_fines; library_reservations target a title/book and may be fulfilled by a copy.
+- transport_routes 1—N transport_route_stops; each bridge references transport_stops and has a unique sequence. Routes may reference transport_vehicles and transport_drivers. transport_assignments reference student_enrolments, route and stop; stop must belong to the assigned route and dates must be valid.
+- boarding_houses 1—N boarding_rooms; student_enrolments have dated boarding_assignments with capacity and overlap validation.
+- meal_plans 1—N meal_orders; student_enrolments may have meal_orders and meal_attendance. Dietary data is restricted.
+- clubs/activities 1—N activity_memberships; memberships reference enrolments, consent and capacity.
+- trips 1—N trip_permissions and trip_attendance; permission checks verified guardian authority and legal restrictions.
+- Domain-specific incidents (transport_incidents, safeguarding_incidents and restricted service incidents where defined) remain restricted. Do not add a generic polymorphic service_incidents table without a validated need.
+- document_categories group documents; documents/document_versions reference files; document_permissions grant scoped access; document_access_logs record use; document_retention_rules govern expiry/legal holds.
+- support_tickets have ticket_categories, ticket_messages, ticket_assignments, ticket_attachments and append-only ticket_status_history. Internal ticket messages are not requester-visible.
+
 
 ## K. XEN SaaS commercial billing
 
-- `subscription_plans 1—N subscription_features`.
-- `schools 1—N school_subscriptions`; subscription references plan and preserves history.
-- `school_subscriptions 1—N subscription_items, subscription_invoices, subscription_events`.
-- `subscription_invoices 1—N subscription_payments`.
-- `schools 1—N usage_records, billing_customers`.
-- Promotion codes require a redemption/usage table before production use (recommended `promotion_redemptions` with school/subscription/invoice and unique redemption key).
+- subscription_plans 1—N subscription_features.
+- schools 1—N school_subscriptions; subscription references a plan and preserves contract/price history.
+- school_subscriptions 1—N subscription_items, subscription_invoices and subscription_events.
+- subscription_invoices 1—N subscription_payments.
+- schools 1—N usage_records and billing_customers.
+- platform_promotions are global platform catalogue records. promotion_redemptions is a proposed ledger keyed by promotion/school/subscription/invoice and idempotency key; create the dictionary entry and limits/approval rules before applying promotion codes.
+- XEN SaaS invoices/payments do not share tables, IDs, posting routines or permissions with school tuition/finance.
+
 
 ## L. Audit and storage
 
-- Audit logs and security events may be platform-level (school_id null) or tenant-scoped.
-- System jobs have job failures; webhook logs deduplicate provider events.
-- Data export/deletion requests are school-scoped and subject-verified; consent records use typed subject references with application validation.
-- File metadata is central. Domain tables point to files through ordinary FKs. Object key uniqueness and tenant/private access policies are enforced.
+- audit_logs, security_events and login_activity may be platform-level (school_id null) or tenant-scoped, and remain restricted/append-only.
+- system_jobs have job_failures; webhook_logs deduplicate provider events; backup_records track retention and restore evidence.
+- data_export_requests and data_deletion_requests are scope/identity-verified; consent_records use typed subject references with validation.
+- files is the canonical file-metadata table. Domain tables point to files through ordinary FKs. Object-key uniqueness and tenant/private access policies are enforced.
 
 ## M. Restricted health and safeguarding
 
@@ -190,3 +194,8 @@ erDiagram
 ```
 
 This diagram is deliberately simplified; the field-level FK mapping and constraints in this document govern implementation.
+
+
+## Canonical table-name reconciliation
+
+Use dictionary names (transport_assignments, documents, document_retention_rules, ticket_messages, ticket_assignments, ticket_attachments, ticket_status_history, files, webhook_logs, backup_records and platform_promotions). Proposed supplemental entities are listed in [schema-blueprint-table-level-review.md](schema-blueprint-table-level-review.md) and require dictionary reconciliation before SQL.
