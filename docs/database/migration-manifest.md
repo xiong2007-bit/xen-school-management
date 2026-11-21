@@ -21,7 +21,7 @@ The live project bootstrap status records 13 applied migration-history entries a
 | Order | Logical group | Canonical table families / scope | Depends on | Blocking acceptance gate |
 |---|---|---|---|---|
 | D01 | conventions and reference data | currency_definitions; UUID/time/money/reference conventions; approved extension inventory (no extension selected by default) | Design freeze | Database/version/extension compatibility; currency precision; conventions reviewed |
-| D02 | tenant root | schools; school_campuses; platform_settings (proposed, dictionary reconciliation required) | D01 | Tenant root integrity; slug/campus-code uniqueness; status and timezone validation |
+| D02 | tenant root | schools; school_campuses; school_groups and school_group_memberships (future); platform_settings (proposed, dictionary reconciliation required) | D01 | Tenant root integrity; slug/campus-code uniqueness; status and timezone validation |
 | D03 | identity and membership | user_profiles; school_memberships; Auth identity mapping | D02; Supabase Auth | Profile mapping; membership invitation/activation/revocation; no duplicate active membership |
 | D04 | authorization and audit foundation | roles; permissions; role_permissions; membership_roles; platform_roles; audit_logs; security_events; login_activity; platform_access_grants (proposed) | D03 | No self-escalation; scope grants; append-only audit; trusted tenant resolver; fail-closed RLS |
 | D05 | file metadata foundation | files; storage classification/scan/status metadata only (no provider integration) | D02–D04 | Unique opaque object key; classification; quarantine/scan state; no public default |
