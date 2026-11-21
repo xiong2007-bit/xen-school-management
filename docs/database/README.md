@@ -13,14 +13,15 @@
 7. [Constraints, indexes, tenant isolation, RLS, lifecycle and open decisions](constraints-indexes-rls.md)
 8. [Approved design decisions (all 13 accepted)](approved-design-decisions.md)
 9. [Database implementation roadmap](implementation-roadmap.md)
-10. [Comprehensive schema blueprint](schema-blueprint.md)
-11. [Migration manifest and acceptance gates](migration-manifest.md)
-12. [Technical decision register — approved baseline](technical-decision-register.md)
-13. [Technical architecture baseline](technical-architecture-baseline.md)
-14. [Pre-implementation readiness checklist](pre-implementation-readiness-checklist.md)
-15. [Gate 0 scope and consistency audit](gate-0-scope-consistency-audit.md)
-16. [Master requirements traceability matrix (MRTM)](requirements-traceability-matrix.md)
-17. [Proposed first-release/pilot scope](proposed-first-release-scope.md)
+10. [Comprehensive schema blueprint](schema-blueprint.md) — logical table inventory, key/tenant relationships, classification, lifecycle, indexes and RLS intent
+11. [Migration manifest and acceptance gates](migration-manifest.md) — ordered dependencies and migration/test gates
+12. [Schema blueprint review checklist](schema-blueprint-review-checklist.md) — table-level review worksheet, domain readiness and security segregation tests
+13. [Technical decision register — approved baseline](technical-decision-register.md)
+14. [Technical architecture baseline](technical-architecture-baseline.md)
+15. [Pre-implementation readiness checklist](pre-implementation-readiness-checklist.md)
+16. [Gate 0 scope and consistency audit](gate-0-scope-consistency-audit.md)
+17. [Master requirements traceability matrix (MRTM)](requirements-traceability-matrix.md)
+18. [Proposed first-release/pilot scope](proposed-first-release-scope.md)
 
 ## Coverage
 The specification covers platform/tenant model; users, roles and access; students, guardians, verified links, emergency contacts/legal restrictions, enrolments and staff; academic programmes/calendars/terms/events, classes/subjects, timetable periods/rooms/versioned schedules; attendance; configurable assessment/grading/promotion/report templates; admissions and fee snapshots; school finance, currency conversions and accounting; website builder/reusable blocks/CMS/domains/translations/forms; parent/student portals and communications/read receipts/moderation; library, transport, boarding, meals, clubs, activities and trips; restricted health/safeguarding; documents, service desk; XEN subscriptions/usage; audit/security/consent/exports/deletion/jobs/webhooks/backups; and file metadata. School groups and student portal features are explicitly future/optional.
@@ -66,3 +67,11 @@ Region/tier and provider capabilities; privacy/legal review and retention schedu
 
 ## Approval boundary
 Technical recommendations are approved as the baseline. This is not implementation authorization. No SQL, migrations, seed data, application code, CI, infrastructure provisioning or deployment should begin until separately authorized.
+
+
+## Schema blueprint review status (21 November 2026)
+
+- [Schema blueprint](schema-blueprint.md): table-by-table conceptual design plus review supplement, security boundaries and blockers.
+- [Migration manifest](migration-manifest.md): 19 proposed ordered migration groups and cross-domain dependency notes.
+- [Review checklist](schema-blueprint-review-checklist.md): table review worksheet and domain-by-domain sign-off status.
+- **Pending:** owner/pilot validation, technical/provider/privacy/legal decisions, RLS and FK implementation review. Documentation only; executable schema and migrations are not created.
