@@ -10,6 +10,7 @@ This checklist tracks readiness before executable database migrations and code a
 - [ ] Review and approve the [proposed first-release scope](proposed-first-release-scope.md), including exclusions and pilot acceptance scenarios (owner prioritization still required).
 - [x] Confirm school types (primary, secondary, combined), Zimbabwe-first market assumptions, role groups and personas from Master Plan v3.0.
 - [x] Draft unique requirement IDs and acceptance criteria in the [Master Requirements Traceability Matrix](requirements-traceability-matrix.md) (owner review and stakeholder validation pending).
+- [x] Draft Stage 3 [pilot workflows, user stories and acceptance criteria](pilot-workflows-user-stories-acceptance-criteria.md) and [validation/sign-off plan](pilot-workflow-validation-signoff.md) (review and acceptance pending).
 - [x] Define change-control principle for scope and architecture amendments in the approved technical baseline.
 - [x] Confirm Master Plan v3.0 glossary and key terminology; extend as implementation-specific terms are added.
 
@@ -123,3 +124,8 @@ This checklist tracks readiness before executable database migrations and code a
 - **Readiness gates:** not yet evidenced/closed.
 - **SQL migrations, application code, CI, infrastructure and deployment:** not started/authorized.
 
+
+
+## Stage 3 status
+
+Stage 3 draft workflows/user stories/acceptance criteria and validation plan are documented. No stakeholder sessions or tests have been conducted; acceptance, pilot scope freeze and implementation authorization remain pending.
