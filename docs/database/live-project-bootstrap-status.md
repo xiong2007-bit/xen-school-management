@@ -17,7 +17,7 @@
 
 ## Database implementation status
 
-Twelve migrations were applied in the Supabase project:
+Thirteen migrations have been applied in the Supabase project:
 
 1. `0001_foundation_people_academics_attendance_assessment`
 2. `0002_admissions_school_finance_core`
@@ -58,7 +58,7 @@ Optional modules (library, transport, boarding, meals, clubs, activities and tri
 
 ## Important reproducibility gap
 
-The live Supabase migration history has the nine applied migration names, but the exact SQL migration files have **not yet been mirrored into the Git repository**. The next engineering task is to create and review versioned migration files in `supabase/migrations/`, verify them against a clean disposable database, and reconcile them with this live schema. Do not treat this live schema as a finalized or reproducible release until that is complete.
+The live Supabase migration history has the original twelve applied migration names, but the exact SQL migration files have **not yet been mirrored into the Git repository**. The next engineering task is to create and review versioned migration files in `supabase/migrations/`, verify them against a clean disposable database, and reconcile them with this live schema. Do not treat this live schema as a finalized or reproducible release until that is complete.
 
 ## Cloudflare API connection scaffold (21 November 2026)
 
