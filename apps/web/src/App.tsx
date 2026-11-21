@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Activity, ArrowUpRight, BookOpen, CalendarCheck, GraduationCap, LayoutDashboard, LogOut, Search, ShieldCheck, Users , ChevronDown, CircleHelp, Bell, Menu, School as SchoolIcon, LockKeyhole, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { supabase, supabaseConfigured, loadSchoolWorkspace, type School, type Student, type SchoolClass, type Attendance } from "./lib/supabase";
 
@@ -75,7 +75,7 @@ export default function App() {
   const filteredStudents = useMemo(() => students.filter(s => `${s.student_number} ${s.legal_first_name} ${s.legal_last_name} ${s.preferred_name || ""}`.toLowerCase().includes(search.toLowerCase())), [students, search]);
   const filteredClasses = useMemo(() => classes.filter(c => `${c.code} ${c.name}`.toLowerCase().includes(search.toLowerCase())), [classes, search]);
 
-  async function signIn(event: React.FormEvent) {
+  async function signIn(event: FormEvent) {
     event.preventDefault(); setAuthError(""); setAuthMessage("");
     if (!supabase) return;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
