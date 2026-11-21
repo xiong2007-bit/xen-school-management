@@ -129,3 +129,11 @@ This checklist tracks readiness before executable database migrations and code a
 ## Stage 3 status
 
 Stage 3 draft workflows/user stories/acceptance criteria and validation plan are documented. No stakeholder sessions or tests have been conducted; acceptance, pilot scope freeze and implementation authorization remain pending.
+
+
+## Stage 4 planning additions
+- [ ] Review and prioritize [Stage 4 backlog/sprint proposal](stage-4-prioritized-pilot-backlog-sprint-plan.md) and assign owners/capacity.
+- [ ] Review [Stage 4 test-case inventory](stage-4-test-case-inventory.md); map tests to requirements and approve quality thresholds.
+- [ ] Review [Stage 4 data-import plan](stage-4-data-import-plan.md); appoint data owner and validate source/mapping/reconciliation process.
+- [ ] Review and complete [Stage 4 implementation readiness gate](stage-4-implementation-readiness-gate.md) with evidence and approvers.
+- **Stage 4 current decision:** planning draft only; readiness is **NO-GO** until mandatory evidence and explicit implementation authorization are completed.
