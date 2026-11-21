@@ -145,3 +145,12 @@ The following are **approved product/design decisions** and must not be reopened
 13. Confirm API permission/exposure, database grants, RLS, tenant context and audit immutability.
 14. Complete pilot school review of naming, workflows, grading, finance, admissions and timetable.
 
+
+
+## 9. Canonical table-name and grouped-entity review
+
+The data dictionaries are authoritative for canonical names. The blueprint/manifest use transport_assignments, documents, document_retention_rules, ticket_categories, ticket_messages, ticket_assignments, ticket_attachments, ticket_status_history, files, webhook_logs, backup_records, login_activity and platform_promotions. Avoid alias duplicates. The table-level reconciliation addendum expands grouped service/support/operations rows and marks supplemental entities as proposals.
+
+Additional index review targets include transport_stops by school/status (coordinates are restricted), transport_drivers by school/status/expiry, transport_route_stops unique route/sequence, transport_assignments by school/enrolment/status/date, document_versions unique document/version, document_permissions by document/principal/validity, document_access_logs by document/time and actor/time, ticket_messages by ticket/time, ticket_assignments by ticket/assignee/validity, ticket_status_history by ticket/time, ticket_attachments by ticket/message, login_activity by user/time and result/time, webhook_logs unique provider/event ID, backup_records by environment/status/completion time, and promotion_redemptions by school/promotion/idempotency. All indexes require workload/write-cost review.
+
+The logical migration labels are D01–D19 and do not correspond to the existing live applied migration history.
