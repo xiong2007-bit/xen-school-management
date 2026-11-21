@@ -1,65 +1,52 @@
 # XEN SCHOOL MANAGEMENT v3.0
 
-A clean, documentation-first monorepo scaffold for the XEN TECHNOLOGIES school-management SaaS platform.
+XEN SCHOOL MANAGEMENT is a multi-tenant school-management SaaS for Zimbabwe-first rollout and international expansion.
 
-## Project status
+## Current implementation (v1 foundation)
 
-**Stage:** repository scaffold and architecture planning only.  
-**Application code:** intentionally not included.  
-**Database implementation:** not included; the approved database blueprint is conceptual documentation at this stage.
+**Frontend foundation committed:** React + TypeScript + Vite workspace under `apps/web`.
+- Supabase email/password authentication (sign in and account creation).
+- Authenticated school workspace selector/profile.
+- School overview metrics.
+- Learner directory with search.
+- Class directory.
+- Recent attendance records.
+- School profile view.
+- Mobile-responsive administration interface.
+- Supabase reads use the authenticated user's session and existing database RLS.
+- No service-role key is included in browser code.
 
-## Product scope
+**Backend scaffold:** Cloudflare Worker `xen-school` provides `GET /health`, `GET /api/v1/me`, and authenticated `GET /api/v1/schools`. Write APIs and secure onboarding are not yet enabled.
 
-XEN SCHOOL MANAGEMENT is a multi-tenant SaaS platform designed for primary, secondary and combined schools, launching in Zimbabwe before expanding internationally. It brings together four connected experiences:
+**Live database baseline:** Supabase project `xen-school` has 209 public tables with RLS enabled. The current database has no school/student demo records. The schema snapshot in `supabase/schema-snapshot/` is reconstructed and for review only—not executable migrations.
 
-1. Individually designed public school websites.
-2. A private school management workspace.
-3. Parent/guardian and optional student portals.
-4. The XEN platform administration console.
+## Local development
 
-## Approved technology direction
+1. Install Node.js 22+.
+2. Open a terminal in `apps/web`.
+3. Run `npm install`.
+4. Copy `.env.example` to `.env`.
+5. Set:
+   - `VITE_SUPABASE_URL` to the Supabase project URL.
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` to the publishable key.
+   - `VITE_XEN_API_URL` to the Cloudflare Worker URL.
+6. Run `npm run dev`.
+7. For a production build, run `npm run build`.
 
-- Frontend: React + TypeScript
-- API/business logic: Cloudflare Workers
-- Database and authentication: Supabase (PostgreSQL and Supabase Auth)
-- Database access control: PostgreSQL Row Level Security
-- File storage: Cloudflare R2
-- Frontend hosting: Vercel
-- DNS, edge security and routing: Cloudflare
-- Source control: GitHub
-- Planned testing: Vitest and Playwright
-- Planned monorepo tooling: pnpm workspaces and Turbo
+Only Supabase publishable keys may be placed in browser environment variables. Never add service-role keys or database passwords.
 
-These are approved architectural directions, not installed or configured dependencies.
+## v1 scope in progress
 
-## Repository structure
+1. Secure school onboarding and membership owner bootstrap (pending policy review).
+2. Academic-year and grade/class setup.
+3. Learner registration and enrolment.
+4. Daily attendance session and marking.
+5. Staff records and role assignment.
+6. Parent/guardian linking and portal access.
+7. Finance, assessments and communication follow in later phases.
 
-- `apps/` — web application, API and marketing experience boundaries.
-- `packages/` — shared UI, types, validation, tenancy, permissions and platform capabilities.
-- `supabase/` — reserved for future database assets; no migrations or executable database code yet.
-- `infrastructure/` — deployment, storage, domains, monitoring and backup planning.
-- `tests/` — future test suites, including tenant-isolation and security tests.
-- `docs/` — product, architecture, database, API, module, security and operational documentation.
-- `scripts/` — reserved for future approved tooling; no scripts included.
+## Deployment
 
-## Key architecture principles
+Vercel configuration is provided in `apps/web/vercel.json`. Set the three Vite environment variables in the Vercel project before deploying. A deployment build and browser smoke tests are pending; this repository change is not a claim that every workflow is production-ready.
 
-- Every school's private records must be tenant-scoped and protected by server-side authorisation and database RLS.
-- Guardian access must be based on verified guardian-to-student relationships.
-- Public school websites must expose only approved published content.
-- Private learner, guardian, attendance, marks, medical and financial records must never be exposed through public website APIs.
-- Financial records must preserve audit history; posted transactions should be reversed or adjusted rather than silently overwritten.
-- XEN SaaS subscription billing must remain separate from each school's operational fee and finance records.
-- Secrets must never be committed to GitHub or exposed to browser code.
-
-## Finance delivery approach
-
-The complete finance architecture is planned up front, with implementation phased. The first finance release is intended to cover fee structures, invoices, verified payments, allocations, receipts and balances. Advanced accounting, reconciliation, bursaries, refunds, budgets and supplier workflows are later phases.
-
-## Working agreement for this stage
-
-This repository is deliberately a scaffold, not a running application. It contains folder placeholders and planning documentation only. Do not treat the presence of a folder as evidence that its feature has been implemented. Application code, SQL migrations, dependency manifests, CI workflows and deployment configuration will be added only in a separately authorised implementation stage.
-
-## Next planning artefacts
-
-The documentation folders provide the locations for the approved v3.0 product plan, architecture decisions, conceptual database dictionary and relationship specification, API contracts, module specifications, security model, deployment plan and testing strategy.
+See [database live implementation status](docs/database/live-project-bootstrap-status.md) and [Supabase snapshot notes](supabase/README.md).
