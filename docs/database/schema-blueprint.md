@@ -430,7 +430,7 @@ Use separate permission keys and separate RLS policies for SELECT/INSERT/UPDATE/
 
 ## 12. Approval boundary
 
-This is a proposed logical blueprint, not final schema. Review for completeness, security, operational practicality, jurisdictional requirements and pilot-school workflows. No SQL, migrations, executable schema, seed data, application code, CI, infrastructure or deployment has been created. Separate explicit authorization is required before implementation.
+This is a proposed logical blueprint, not final schema. Review for completeness, security, operational practicality, jurisdictional requirements and pilot-school workflows. No executable schema, SQL migration, seed data, application code, CI, infrastructure or deployment was created by this blueprint/review. Existing live bootstrap and repository artifacts are documented separately; they are not proof that this normalized design is implemented or replayable. Separate explicit authorization is required before further implementation.
 
 
 ## 13. Schema review supplement — table-level sign-off and boundary controls
