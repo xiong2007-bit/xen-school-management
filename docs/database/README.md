@@ -14,8 +14,9 @@
 8. [Approved design decisions (all 13 accepted)](approved-design-decisions.md)
 9. [Database implementation roadmap](implementation-roadmap.md)
 10. [Comprehensive schema blueprint](schema-blueprint.md) — logical table inventory, key/tenant relationships, classification, lifecycle, indexes and RLS intent
-11. [Migration manifest and acceptance gates](migration-manifest.md) — ordered dependencies and migration/test gates
-12. [Schema blueprint review checklist](schema-blueprint-review-checklist.md) — table-level review worksheet, domain readiness and security segregation tests
+11. [Schema blueprint table-level reconciliation and security review](schema-blueprint-table-level-review.md) — canonical table names, grouped entities expanded, security matrix, logical migration groups, gates and technical blockers
+12. [Migration manifest and acceptance gates](migration-manifest.md) — D01–D19 logical dependencies; not actual migration filenames
+13. [Schema blueprint review checklist](schema-blueprint-review-checklist.md) — table-level review worksheet, domain readiness and security segregation tests
 13. [Technical decision register — approved baseline](technical-decision-register.md)
 14. [Technical architecture baseline](technical-architecture-baseline.md)
 15. [Pre-implementation readiness checklist](pre-implementation-readiness-checklist.md)
@@ -73,10 +74,12 @@ The user explicitly authorized initial infrastructure and database implementatio
 
 ## Schema blueprint review status (21 November 2026)
 
-- [Schema blueprint](schema-blueprint.md): table-by-table conceptual design plus review supplement, security boundaries and blockers.
-- [Migration manifest](migration-manifest.md): 19 proposed ordered migration groups and cross-domain dependency notes.
-- [Review checklist](schema-blueprint-review-checklist.md): table review worksheet and domain-by-domain sign-off status.
-- **Pending:** owner/pilot validation, technical/provider/privacy/legal decisions, RLS and FK implementation review. Documentation only; executable schema and migrations are not created.
+- [Schema blueprint](schema-blueprint.md): logical table-by-table proposal, domain boundaries, classification, lifecycle, indexes and RLS intent.
+- [Table-level reconciliation and security review](schema-blueprint-table-level-review.md): canonical names reconciled; grouped optional services, support, governance and SaaS entities expanded; security matrix, logical dependencies, test gates and unresolved technical verification.
+- [Migration manifest](migration-manifest.md): D01–D19 ordered logical groups. These labels are not actual migration filenames or applied versions.
+- [Review checklist](schema-blueprint-review-checklist.md): table-level worksheet and domain sign-off status.
+- **Pending:** live schema baseline diff and clean replay; exact FK/null/delete/index/grant/RLS review; provider/legal/operational verification; pilot validation. Documentation only; no executable schema or new migration was created.
+
 
 
 ## Stage 3 workflow design status
@@ -97,4 +100,4 @@ The user explicitly authorized initial infrastructure and database implementatio
 
 ## Live implementation status (21 November 2026)
 
-- [Live project bootstrap and migration status](live-project-bootstrap-status.md): Cloudflare Worker and Supabase project created; initial schema applied (209 tables with RLS), 12 migrations, and 18 role templates; no school data loaded. Worker scaffold is not yet connected to Supabase. Versioned SQL files are pending repository synchronization and clean replay validation.
+- [Live project bootstrap and migration status](live-project-bootstrap-status.md): Supabase bootstrap reports 13 applied migration-history entries, 209 public tables with RLS, 171 policies, 163 tenant-select policies, 18 role templates, 45 permissions and 123 mappings; no school data loaded. The read-only Cloudflare Worker API scaffold is deployed; live HTTP smoke testing remains pending. Only the verified school-owner provisioning SQL is currently mirrored as authored migration; the catalog snapshot is reconstructed and clean replay remains unverified.
