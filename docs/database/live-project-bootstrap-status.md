@@ -74,12 +74,30 @@ The live Supabase migration history has the nine applied migration names, but th
 
 Four catalog-derived SQL files are committed under `supabase/schema-snapshot/` (tables, constraints, indexes/RLS/policies, helper/reference seed). They were moved out of `supabase/migrations/` deliberately because they are not validated migrations and would otherwise risk being auto-applied to the already-provisioned project. A clean replay has not been tested. Links: [snapshot folder](https://github.com/xiong2007-bit/xen-school-management/tree/main/supabase/schema-snapshot), [Supabase notes](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/README.md), [catalog checks](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/verification/catalog_checks.sql).
 
+## v1 web foundation (21 November 2026)
+
+- React + TypeScript + Vite frontend files are committed under `apps/web/`.
+- Supabase email/password sign-in and account creation UI implemented.
+- Read-only school workspace, overview cards, learner directory/search, class list, attendance records, and school profile implemented using authenticated Supabase client and RLS.
+- Vercel project configuration updated to project name `xen-school-management`, root directory `apps/web`, Vite build, Node 22, and output `dist`.
+- Vercel environment variables configured for Production, Preview, Development: Supabase URL, publishable key, and Cloudflare API URL. These are public client configuration values; no service-role key was set.
+- Vercel deployment attempts (Git-linked and direct source) both failed before build with `BUILD_FAILED: Resource provisioning failed`. No build logs were returned. Hosted app is **not yet live**; this appears to be a Vercel provisioning issue, not a confirmed source build failure.
+- Frontend build has not been locally executed because the environment cannot reach GitHub/npm.
+
 ## Not yet implemented
 
-- Supabase Auth signup/onboarding flow, secure school provisioning, role assignment and permissions enforcement
-- API/database connection from Cloudflare Worker (no Supabase secrets configured in Worker)
+- Secure school onboarding, school-owner bootstrap and membership/role assignment
+- Student create/edit/admission/enrolment workflows (currently read-only list)
+- Class/grade creation and academic-year configuration
+- Attendance session creation and marking (currently read-only list)
+- Staff administration, guardian linking and parent portal
+- API/database write endpoints, transactional business workflows or write RLS policies
 - Cloudflare R2 bucket and private upload/scan pipeline
-- Actual application frontend, dashboard, forms, reports or end-to-end workflows
+- Payment providers, email/SMS providers, webhook processing
+- Public CMS read projection and domain verification workflow
+- Full normalized optional-service and operations schemas
+- Restricted health/safeguarding access implementation
+- Clean migration chain/replay, automated tests, CI, backup/recovery drill, legal/privacy review and pilot signoff
 - Client/server write policies, RPCs or validated business transactions
 - Payment providers, email/SMS providers, webhook processing
 - Public CMS read projection and domain verification workflow
