@@ -81,8 +81,8 @@ export default function App() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setAuthError(error.message);
   }
-  async function signUp(event: React.FormEvent) {
-    event.preventDefault(); setAuthError(""); setAuthMessage("");
+  async function signUp() {
+    setAuthError(""); setAuthMessage("");
     if (!supabase) return;
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) setAuthError(error.message); else setAuthMessage("Account created. Check your email to confirm, then sign in.");
