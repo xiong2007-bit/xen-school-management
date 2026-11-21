@@ -9,7 +9,7 @@
 
 The existing schema blueprint and migration manifest remain the design baseline. This review reconciles table names against the dictionaries, expands grouped optional-service/support/governance/SaaS entities to table-level review, and makes migration numbering safe to distinguish from the existing live migration history.
 
-- The five data-dictionary files contain 208 headings representing 207 distinct canonical names. The academics dictionary had one empty duplicate heading for grade_levels; that duplicate was removed as a documentation correction.
+- Before correction, the five data-dictionary files contained 208 headings representing 207 distinct canonical names. The empty duplicate grade_levels heading has been removed; the current inventory is 207 headings and 207 distinct canonical names.
 - The main schema blueprint had duplicated website_reusable_blocks and website_starter_templates rows. Those duplicate rows were removed.
 - Canonical names from the dictionaries are used below and in the updated blueprint/manifest. Alias spellings are not new tables.
 - All 13 accepted product/design decisions remain accepted. No product decision is reopened here.
@@ -116,7 +116,7 @@ The main schema-blueprint Sections 4A–4H and 4K–4L retain table-by-table det
 | Table | PK / tenant | FKs / dependencies | Constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|---|
 | transport_vehicles | id / school_id | campus optional | unique registration; capacity > 0; inspection/insurance due indexes | P2; active/maintenance/inactive/retired | Transport manager |
-| transport_routes | id / school_id | academic_year optional; vehicle; transport_driver | unique route_code/year; route/status/time indexes | P1/P2; draft/active/paused/retired | Transport scope |
+| transport_routes | id / school_id | academic_year optional; vehicle; transport_drivers | unique route_code/year; route/status/time indexes | P1/P2; draft/active/paused/retired | Transport scope |
 | transport_stops | id / school_id | location fields | coordinate validation; location index review | P2/P3; active/inactive | Transport; coordinates/safe-pickup notes restricted |
 | transport_route_stops | id / school_id | route; stop | unique route/sequence; same tenant; planned time | P2; route-version scoped | Transport |
 | transport_drivers | id / school_id | optional staff | staff same tenant; encrypted licence; expiry/status index | P3; active/inactive/suspended | Transport/HR split |
@@ -149,18 +149,18 @@ The main schema-blueprint Sections 4A–4H and 4K–4L retain table-by-table det
 | document_versions | id / school_id | document; files | unique document/version; checksum and scan status | P2/P3; uploaded/quarantined/clean/rejected/archived | Authorized readers; quarantine denied |
 | document_permissions | id / school_id | document; principal/scope | validity range; no public grant for restricted | P3; active/expired/revoked | Grantor authorized; no self-grant |
 | document_access_logs | id / school_id | document; user | append-only; document/time and actor/time indexes | P3 | Security/audit readers |
-| document_retention_rules | id / school_id nullable | category optional | retention days/action; legal hold overrides deletion; category index | P3; active/reviewed/retired | Privacy/compliance |
+| document_retention_rules | id / school_id | category optional | retention days/action; legal hold overrides deletion; category index | P3; active/reviewed/retired | Privacy/compliance |
 
 ### 5.5 Service desk
 
 | Table | PK / tenant | FKs / dependencies | Constraints / indexes | Class / lifecycle | RLS intent |
 |---|---|---|---|---|---|
-| support_tickets | id UUID / school_id nullable | requester profile or guardian; category | unique ticket number; status/priority/assignee indexes | P2/P3; new/open/in-progress/waiting/resolved/closed | Requester + assigned support |
-| ticket_categories | id / school_id nullable | platform or tenant category | unique scope/code; default priority; active index | P1; active/inactive | Support admin |
-| ticket_messages | id / school_id nullable | ticket; sender profile | requester/internal visibility; ticket/time index | P2/P3 | Internal notes never requester-visible |
-| ticket_assignments | id / school_id nullable | ticket; assignee/grantor | assignment interval history; ticket/assignee indexes | P2; assigned/unassigned | Support |
-| ticket_attachments | id / school_id nullable | ticket/message/files | scan-clean requirement; visibility checks | P2/P3 | Requester-visible only when authorized |
-| ticket_status_history | id / school_id nullable | ticket; actor | append-only; ticket/time index | P2/P3; transition history | Support and requester-safe projection |
+| support_tickets | id UUID / school_id | requester profile or guardian; category | unique ticket number; status/priority/assignee indexes | P2/P3; new/open/in-progress/waiting/resolved/closed | Requester + assigned support |
+| ticket_categories | id / school_id | school category | unique scope/code; default priority; active index | P1; active/inactive | Support admin |
+| ticket_messages | id / school_id | ticket; sender profile | requester/internal visibility; ticket/time index | P2/P3 | Internal notes never requester-visible |
+| ticket_assignments | id / school_id | ticket; assignee/grantor | assignment interval history; ticket/assignee indexes | P2; assigned/unassigned | Support |
+| ticket_attachments | id / school_id | ticket/message/files | scan-clean requirement; visibility checks | P2/P3 | Requester-visible only when authorized |
+| ticket_status_history | id / school_id | ticket; actor | append-only; ticket/time index | P2/P3; transition history | Support and requester-safe projection |
 
 ### 5.6 XEN SaaS billing (platform billing, not school finance)
 
@@ -185,9 +185,9 @@ The main schema-blueprint Sections 4A–4H and 4K–4L retain table-by-table det
 | audit_logs | id UUID / nullable school_id | actor/profile; typed resource reference | append-only; school/time, actor/time, resource indexes | P3; immutable | Audit readers; writer service only |
 | security_events | id / nullable school_id | user/profile optional | severity/type/time; sanitized metadata | P3; open/triaged/resolved | Security operators |
 | login_activity | id / nullable school_id | user/profile optional | time/result/method; IP hash only; retention | P3; success/failure/challenge | Security access only |
-| data_export_requests | id / nullable school_id | requester; optional files | identity verification, scope, expiry/approval | P3; submitted/verified/approved/processing/completed/failed/rejected/expired | Privacy admin; requester status only |
+| data_export_requests | id / school_id | requester; optional files | identity verification, scope, expiry/approval | P3; submitted/verified/approved/processing/completed/failed/rejected/expired | Privacy admin; requester status only |
 | data_deletion_requests | id / nullable school_id | requester; typed subject | legal hold/retention review and outcome | P3; submitted/verified/review/approved/held/completed/rejected | Privacy admin |
-| consent_records | id / nullable school_id | validated typed subject; optional evidence file | purpose/policy version; grant/withdraw dates | P2/P3; granted/withdrawn/expired | Privacy role; subject/guardian view where lawful |
+| consent_records | id / school_id | validated typed subject; optional evidence file | purpose/policy version; grant/withdraw dates | P2/P3; granted/withdrawn/expired | Privacy role; subject/guardian view where lawful |
 | system_jobs | id UUID / nullable school_id | workflow refs validated | idempotency key; job type/status/time indexes | P3; queued/running/succeeded/failed/cancelled | Operations |
 | job_failures | id UUID / nullable school_id | system_job | sanitized error; retryable/attempt number | P3; retryable/resolved | Operations |
 | webhook_logs | id UUID / nullable school_id | provider event; domain event optional | unique provider/event ID; signature/dedupe | P3; received/verified/processed/failed | Integration operators |
@@ -239,7 +239,7 @@ These are dependency group labels, not actual migration filenames. Core table-by
 | Logical group | Canonical entities | Depends on |
 |---|---|---|
 | D01 conventions/reference | currency_definitions; UUID/time/money/reference conventions; approved extension inventory | Design freeze |
-| D02 tenant root | schools; school_campuses; platform_settings (proposed) | D01 |
+| D02 tenant root | schools; school_campuses; school_groups and school_group_memberships (future); platform_settings (proposed) | D01 |
 | D03 identity | user_profiles; school_memberships | D02; Auth |
 | D04 authorization/audit | roles; permissions; role_permissions; membership_roles; platform_roles; audit_logs; security_events; login_activity; platform_access_grants (proposed) | D03 |
 | D05 files | files | D02–D04 |
