@@ -22,6 +22,9 @@ export default function App() {
   const [authMessage, setAuthMessage] = useState("");
   const [tab, setTab] = useState<Tab>("overview");
   const [schools, setSchools] = useState<School[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
+  const [creatingSchool, setCreatingSchool] = useState(false);
+  const [onboardingError, setOnboardingError] = useState("");
   const [schoolId, setSchoolId] = useState("");
   const [schoolData, setSchoolData] = useState<{students:Student[];classes:SchoolClass[];attendance:Attendance[]}|null>(null);
   const [loadingData, setLoadingData] = useState(false);
@@ -39,15 +42,17 @@ export default function App() {
   useEffect(() => {
     if (!session || !supabase) { setSchools([]); setSchoolId(""); return; }
     let active = true;
+    setLoadingSchools(true);
     supabase.from("schools").select("id,slug,legal_name,display_name,country_code,default_currency,timezone,status").order("display_name")
       .then(({ data, error }) => {
         if (!active) return;
+        setLoadingSchools(false);
         if (error) { setDataError(error.message); return; }
         const list = (data || []) as School[];
         setSchools(list);
         setSchoolId(current => current || list[0]?.id || "");
       });
-    return () => { active = false; };
+    return () => { active = false; setLoadingSchools(false); };
   }, [session]);
 
   useEffect(() => {
@@ -75,6 +80,30 @@ export default function App() {
   const filteredStudents = useMemo(() => students.filter(s => `${s.student_number} ${s.legal_first_name} ${s.legal_last_name} ${s.preferred_name || ""}`.toLowerCase().includes(search.toLowerCase())), [students, search]);
   const filteredClasses = useMemo(() => classes.filter(c => `${c.code} ${c.name}`.toLowerCase().includes(search.toLowerCase())), [classes, search]);
 
+  async function createSchool(values: {legalName:string;displayName:string;slug:string;countryCode:string;currencyCode:string;timezone:string}) {
+    if (!supabase) return;
+    setCreatingSchool(true); setOnboardingError("");
+    try {
+      const { data, error } = await supabase.rpc("provision_school_for_current_user", {
+        p_legal_name: values.legalName,
+        p_display_name: values.displayName,
+        p_slug: values.slug,
+        p_country_code: values.countryCode,
+        p_currency_code: values.currencyCode,
+        p_timezone: values.timezone
+      });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row?.school_id) throw new Error("School creation returned no school ID.");
+      const { data: created, error: readError } = await supabase.from("schools").select("id,slug,legal_name,display_name,country_code,default_currency,timezone,status").eq("id",row.school_id).single();
+      if (readError) throw readError;
+      setSchools(current => [...current,created as School]);
+      setSchoolId(row.school_id);
+    } catch (error:any) {
+      setOnboardingError(error.message || "School could not be created.");
+    } finally { setCreatingSchool(false); }
+  }
+
   async function signIn(event: FormEvent) {
     event.preventDefault(); setAuthError(""); setAuthMessage("");
     if (!supabase) return;
@@ -93,6 +122,9 @@ export default function App() {
   if (!supabaseConfigured) return <SetupScreen />;
   if (authLoading) return <div className="loading-screen"><Loader2 className="spin" size={24}/> Loading secure session…</div>;
   if (!session) return <LoginScreen email={email} password={password} setEmail={setEmail} setPassword={setPassword} signIn={signIn} signUp={signUp} authError={authError} authMessage={authMessage}/>;
+
+  if (loadingSchools) return <div className="loading-screen"><Loader2 className="spin" size={24}/> Loading school access…</div>;
+  if (schools.length === 0) return <SchoolOnboarding email={session.user.email || ""} createSchool={createSchool} loading={creatingSchool} error={onboardingError} signOut={signOut}/>;
 
   return <div className="shell">
     <aside className={mobileMenu ? "sidebar open" : "sidebar"}>
@@ -121,7 +153,25 @@ export default function App() {
   </div>;
 }
 
-function SetupScreen(){return <div className="setup-screen"><div className="login-card"><Brand/><div className="login-heading"><h1>Configure your workspace</h1><p>Set the Supabase project connection to begin.</p></div><div className="notice"><AlertCircle size={18}/><div><strong>Environment variables are missing</strong><p>Create <code>apps/web/.env</code> from <code>.env.example</code> and set your Supabase URL and publishable key. Never add a service-role key to this app.</p></div></div><div className="setup-steps"><p><b>1.</b> Copy the example env file.</p><p><b>2.</b> Add the Supabase project URL.</p><p><b>3.</b> Add the publishable key.</p><p><b>4.</b> Restart the dev server.</p></div></div></div>}
+function SchoolOnboarding({email,createSchool,loading,error,signOut}:any){
+  const [legalName,setLegalName]=useState("");
+  const [displayName,setDisplayName]=useState("");
+  const [slug,setSlug]=useState("");
+  const [countryCode,setCountryCode]=useState("ZW");
+  const [currencyCode,setCurrencyCode]=useState("USD");
+  const [timezone,setTimezone]=useState("Africa/Harare");
+  const slugify=(value:string)=>value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60);
+  return <div className="onboarding-page"><div className="onboarding-card"><Brand/><div className="onboarding-kicker">FIRST-TIME SETUP</div><h1>Create your school workspace</h1><p>Signed in as <strong>{email}</strong>. Your school will begin in onboarding status. You will be assigned the initial school-owner role.</p><form onSubmit={(e)=>{e.preventDefault();createSchool({legalName,displayName:displayName||legalName,slug,countryCode,currencyCode,timezone});}} className="onboarding-form">
+  <label>School legal name<input required minLength={2} maxLength={160} value={legalName} onChange={e=>{setLegalName(e.target.value);if(!displayName)setDisplayName(e.target.value);if(!slug)setSlug(slugify(e.target.value));}} placeholder="e.g. Chaplin High School"/></label>
+  <label>School display name<input required minLength={2} maxLength={100} value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="School name shown in app"/></label>
+  <label>Workspace URL slug<input required minLength={3} maxLength={60} pattern="[a-z0-9][a-z0-9-]*[a-z0-9]" value={slug} onChange={e=>setSlug(slugify(e.target.value))}/><small>Lowercase letters, numbers and hyphens only.</small></label>
+  <div className="onboarding-row"><label>Country code<input required maxLength={2} pattern="[A-Z]{2}" value={countryCode} onChange={e=>setCountryCode(e.target.value.toUpperCase())}/></label><label>Currency<input required maxLength={3} pattern="[A-Z]{3}" value={currencyCode} onChange={e=>setCurrencyCode(e.target.value.toUpperCase())}/></label></div>
+  <label>Timezone<input required value={timezone} onChange={e=>setTimezone(e.target.value)}/></label>
+  {error&&<div className="auth-error">{error}</div>}
+  <button className="btn-primary full" type="submit" disabled={loading}>{loading?<><Loader2 className="spin" size={16}/> Creating workspace…</>:"Create school workspace"}</button>
+  </form><button className="onboarding-signout" onClick={signOut}>Sign out</button><div className="login-foot"><ShieldCheck size={14}/> Email verification required · Tenant access protected</div></div></div>;
+}
+\nfunction SetupScreen(){return <div className="setup-screen"><div className="login-card"><Brand/><div className="login-heading"><h1>Configure your workspace</h1><p>Set the Supabase project connection to begin.</p></div><div className="notice"><AlertCircle size={18}/><div><strong>Environment variables are missing</strong><p>Create <code>apps/web/.env</code> from <code>.env.example</code> and set your Supabase URL and publishable key. Never add a service-role key to this app.</p></div></div><div className="setup-steps"><p><b>1.</b> Copy the example env file.</p><p><b>2.</b> Add the Supabase project URL.</p><p><b>3.</b> Add the publishable key.</p><p><b>4.</b> Restart the dev server.</p></div></div></div>}
 function Brand(){return <div className="brand login-brand"><div className="brand-mark"><GraduationCap size={22}/></div><div><strong>XEN</strong><span>SCHOOL MANAGEMENT</span></div></div>}
 function LoginScreen({email,password,setEmail,setPassword,signIn,signUp,authError,authMessage}:any){return <div className="login-screen"><div className="login-card"><Brand/><div className="login-heading"><div className="eyebrow">YOUR SCHOOL, CONNECTED</div><h1>Welcome back</h1><p>Sign in to your school workspace.</p></div><form onSubmit={signIn} className="login-form"><label>Email address<input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@school.org"/></label><label>Password<input type="password" autoComplete="current-password" minLength={6} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password"/></label><button className="btn-primary full" type="submit">Sign in <ArrowUpRight size={16}/></button><button className="btn-secondary full" type="button" onClick={signUp}>Create account</button></form>{authError&&<div className="auth-error">{authError}</div>}{authMessage&&<div className="auth-success">{authMessage}</div>}<div className="login-foot"><LockKeyhole size={14}/> Secure authentication by Supabase</div></div><div className="login-aside"><div className="aside-glow"/><div className="aside-content"><div className="aside-tag">XEN TECHNOLOGIES · EDUCATION</div><h2>One connected<br/><span>school ecosystem.</span></h2><p>From attendance to academic progress, bring your school operations together in one secure workspace.</p><div className="aside-feature"><span><Users size={18}/></span> Learner information & records</div><div className="aside-feature"><span><CalendarCheck size={18}/></span> Attendance & daily operations</div><div className="aside-feature"><span><BookOpen size={18}/></span> Classes & academic structure</div></div><div className="aside-footer">Built for schools in Zimbabwe and beyond.</div></div></div>}
 function Overview({school,students,classes,attendance,rate,loading}:any){return <><div className="welcome-card"><div className="welcome-copy"><div className="welcome-tag"><span/> SCHOOL WORKSPACE</div><h2>{school?.display_name||"Welcome to XEN School"}</h2><p>{school? "Your school workspace overview. Use the sidebar to navigate administration modules.":"Your school workspace is ready to be provisioned."}</p></div><div className="welcome-art"><div className="art-circle"><GraduationCap size={54}/></div><div className="art-orbit orbit-one"/><div className="art-orbit orbit-two"/></div></div><div className="metrics-grid"><Metric icon={Users} label="Learners" value={students.length} detail="Visible in your school" color="blue"/><Metric icon={BookOpen} label="Classes" value={classes.length} detail="Active class records" color="violet"/><Metric icon={CalendarCheck} label="Attendance records" value={attendance.length} detail="Recent records loaded" color="green"/><Metric icon={Activity} label="Attendance trend" value={rate===null?"—":rate+"%"} detail="Based on loaded records" color="amber"/></div><div className="content-grid"><div className="panel"><div className="panel-head"><div><h3>Recent learners</h3><p>Latest learner records in your workspace</p></div><button className="text-link" onClick={()=>window.dispatchEvent(new CustomEvent("xen-tab",{detail:"students"}))}>View all <ArrowUpRight size={14}/></button></div>{loading?<EmptyState message="Loading records…"/>:students.length?<StudentTable students={students.slice(0,5)}/>:<EmptyState message="Learner records will appear here once registered."/>}</div><div className="panel"><div className="panel-head"><div><h3>Quick overview</h3><p>Workspace status</p></div></div><div className="overview-list"><OverviewRow label="School status" value={school?.status||"Not assigned"} status={school?.status==="active"}/><OverviewRow label="Country" value={school?.country_code||"—"}/><OverviewRow label="Currency" value={school?.default_currency||"—"}/><OverviewRow label="Timezone" value={school?.timezone||"—"}/></div><div className="panel-note"><ShieldCheck size={16}/> School data is filtered by your authenticated access.</div></div></div><div className="bottom-note"><span className="status-dot"/> Connected to the XEN school platform <span>·</span> Data is protected by row-level security</div></>}
