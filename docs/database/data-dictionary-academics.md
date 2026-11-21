@@ -35,8 +35,6 @@ Common columns and tenant rules are defined in `data-dictionary-platform.md`. Al
 `id, school_id, timetable_id FK, timetable_entry_id FK, exception_date date, exception_type, replacement_period_id nullable FK, replacement_room_id nullable FK, reason nullable, approved_by uuid nullable, created_at`. Supports cancellations/moved sessions without rewriting recurring entries.
 
 ### grade_levels
-
-### grade_levels
 `id, school_id, code, name, sort_order, education_stage, age_min nullable, age_max nullable, is_active, timestamps`. Unique code; configurable for school context (e.g., Grade, Form, Year).
 
 ### classes
