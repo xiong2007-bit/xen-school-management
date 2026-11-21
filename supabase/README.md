@@ -5,7 +5,7 @@
 - Project ref: pdidtgcrubfcacdlvpmx
 - Region: eu-west-1
 - URL: https://pdidtgcrubfcacdlvpmx.supabase.co
-- 12 migrations applied in live history; schema is currently a scaffold.
+- 13 migrations applied in live history; schema is currently a scaffold.
 
 ## Schema snapshot
 The `schema-snapshot/` directory contains catalog-reconstructed SQL files captured from the live database. **These are not executable Supabase migrations and must not be run against the live project.** They were placed outside `migrations/` to avoid accidentally being picked up by `supabase db push`.
