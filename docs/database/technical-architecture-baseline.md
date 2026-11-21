@@ -1,6 +1,6 @@
 # Technical Architecture Baseline — XEN SCHOOL MANAGEMENT v3.0
 
-**Status:** Owner-approved architecture baseline (20 November 2026). This is a planning document. Provider, legal, operational and security verification gates remain open; implementation is not yet authorized.
+**Status:** Owner-approved architecture baseline (20 November 2026); a live bootstrap has since been started as recorded in live-project-bootstrap-status.md. Provider, legal, operational and security verification gates remain open. This baseline does not authorize further implementation.
 
 ## 1. Purpose
 This document records the agreed architecture direction for XEN SCHOOL MANAGEMENT v3.0. It translates approved product/design decisions and the Technical Decision Register into a baseline for detailed design and migration readiness.
@@ -127,4 +127,4 @@ Before production, define per-domain RPO/RTO, backup cadence/retention, PITR cap
 - [ ] Obtain separate implementation authorization.
 
 ## 14. Implementation boundary
-This architecture baseline does not create or authorize executable SQL, migration files, seed data, application code, CI workflows, infrastructure, or deployment. The next planning stage is a pre-implementation readiness checklist and sign-off package.
+This architecture baseline does not create or authorize further executable SQL, migration files, seed data, application code, CI workflows, infrastructure, or deployment. Existing bootstrap artifacts and the live database must be reconciled to the target blueprint. The next planning stage is baseline/replay validation and a pre-implementation readiness/sign-off package.
