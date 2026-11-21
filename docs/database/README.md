@@ -22,6 +22,8 @@
 16. [Gate 0 scope and consistency audit](gate-0-scope-consistency-audit.md)
 17. [Master requirements traceability matrix (MRTM)](requirements-traceability-matrix.md)
 18. [Proposed first-release/pilot scope](proposed-first-release-scope.md)
+19. [Stage 3 pilot workflows, user stories and acceptance criteria](pilot-workflows-user-stories-acceptance-criteria.md)
+20. [Stage 3 pilot workflow validation and sign-off plan](pilot-workflow-validation-signoff.md)
 
 ## Coverage
 The specification covers platform/tenant model; users, roles and access; students, guardians, verified links, emergency contacts/legal restrictions, enrolments and staff; academic programmes/calendars/terms/events, classes/subjects, timetable periods/rooms/versioned schedules; attendance; configurable assessment/grading/promotion/report templates; admissions and fee snapshots; school finance, currency conversions and accounting; website builder/reusable blocks/CMS/domains/translations/forms; parent/student portals and communications/read receipts/moderation; library, transport, boarding, meals, clubs, activities and trips; restricted health/safeguarding; documents, service desk; XEN subscriptions/usage; audit/security/consent/exports/deletion/jobs/webhooks/backups; and file metadata. School groups and student portal features are explicitly future/optional.
@@ -75,3 +77,10 @@ Technical recommendations are approved as the baseline. This is not implementati
 - [Migration manifest](migration-manifest.md): 19 proposed ordered migration groups and cross-domain dependency notes.
 - [Review checklist](schema-blueprint-review-checklist.md): table review worksheet and domain-by-domain sign-off status.
 - **Pending:** owner/pilot validation, technical/provider/privacy/legal decisions, RLS and FK implementation review. Documentation only; executable schema and migrations are not created.
+
+
+## Stage 3 workflow design status
+
+- [Detailed workflows and acceptance criteria](pilot-workflows-user-stories-acceptance-criteria.md): 18 pilot workflows, persona-based user stories, testable acceptance criteria, exception paths, cross-workflow safety rules and validation protocol.
+- [Validation and sign-off plan](pilot-workflow-validation-signoff.md): stakeholder review checklist, validation sessions, outcome log and proposed sign-off gates.
+- **Pending:** product owner and pilot-school validation; acceptance criteria are draft and have not been tested. Documentation only; implementation not authorized.
