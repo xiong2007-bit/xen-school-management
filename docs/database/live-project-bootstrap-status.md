@@ -60,6 +60,20 @@ Optional modules (library, transport, boarding, meals, clubs, activities and tri
 
 The live Supabase migration history has the nine applied migration names, but the exact SQL migration files have **not yet been mirrored into the Git repository**. The next engineering task is to create and review versioned migration files in `supabase/migrations/`, verify them against a clean disposable database, and reconcile them with this live schema. Do not treat this live schema as a finalized or reproducible release until that is complete.
 
+## Cloudflare API connection scaffold (21 November 2026)
+
+- Worker `xen-school` redeployed with API routes and observability enabled; deployment tag `6f40e55458184e94b2e8a2435b19f035`.
+- Secret bindings confirmed by Cloudflare: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (no service-role key).
+- `GET /health` attempts a non-data REST reachability check.
+- `GET /api/v1/me` validates a supplied bearer JWT through Supabase Auth.
+- `GET /api/v1/schools` proxies a read-only schools list with the caller JWT; RLS remains the database access control.
+- All other paths return 404; only GET and OPTIONS are accepted.
+- Deployment was confirmed through Cloudflare API and script content/secrets bindings were inspected. **Live HTTP runtime testing was not completed** because the external worker URL could not be fetched in this session.
+
+## Reconstructed schema snapshot
+
+Four catalog-derived SQL files are committed under `supabase/schema-snapshot/` (tables, constraints, indexes/RLS/policies, helper/reference seed). They were moved out of `supabase/migrations/` deliberately because they are not validated migrations and would otherwise risk being auto-applied to the already-provisioned project. A clean replay has not been tested. Links: [snapshot folder](https://github.com/xiong2007-bit/xen-school-management/tree/main/supabase/schema-snapshot), [Supabase notes](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/README.md), [catalog checks](https://github.com/xiong2007-bit/xen-school-management/blob/main/supabase/verification/catalog_checks.sql).
+
 ## Not yet implemented
 
 - Supabase Auth signup/onboarding flow, secure school provisioning, role assignment and permissions enforcement
