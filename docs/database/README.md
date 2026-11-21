@@ -1,6 +1,6 @@
 # Database Specification Index — XEN SCHOOL MANAGEMENT v3.0
 
-**Status:** Complete conceptual specification with approved product/design decisions and approved technical architecture baseline. Documentation only; not implemented. No SQL migrations, executable schema, seed data, or RLS code exists yet.
+**Status:** Specification baseline plus initial live bootstrap implementation. See [live project bootstrap status](live-project-bootstrap-status.md) for cloud resources, migration history, table counts, security posture and remaining implementation gaps.
 
 ## Specification documents
 
@@ -67,8 +67,8 @@ The specification covers platform/tenant model; users, roles and access; student
 ## Remaining verification before production
 Region/tier and provider capabilities; privacy/legal review and retention schedule; payment provider selection; storage validation; RPO/RTO and recovery drill; domain routing/SSL; role/RLS/API exposure review; operational cost/limits, observability, support and rollback.
 
-## Approval boundary
-Technical recommendations are approved as the baseline. This is not implementation authorization. No SQL, migrations, seed data, application code, CI, infrastructure provisioning or deployment should begin until separately authorized.
+## Implementation boundary
+The user explicitly authorized initial infrastructure and database implementation on 21 November 2026. The initial cloud bootstrap is now applied; this does not authorize production data, public client write access, payments, or release. Migration SQL still needs to be mirrored into Git and verified on a clean disposable database. See [live project bootstrap status](live-project-bootstrap-status.md).
 
 
 ## Schema blueprint review status (21 November 2026)
@@ -93,3 +93,8 @@ Technical recommendations are approved as the baseline. This is not implementati
 - [Pilot data import and migration plan](stage-4-data-import-plan.md): source inventory, batch order, mapping, dry-run, reconciliation, cutover and recovery. No school data processed.
 - [Implementation readiness gate](stage-4-implementation-readiness-gate.md): proposed GO / GO WITH CONDITIONS / NO-GO evidence gate and signoff roles.
 - **Stage 4 outcome:** planning documents drafted and committed for review. Implementation readiness remains **NO-GO** pending stakeholder validation, required evidence and explicit authorization. Documentation only; no code, migrations, CI, infrastructure, deployment or imports created.
+
+
+## Live implementation status (21 November 2026)
+
+- [Live project bootstrap and migration status](live-project-bootstrap-status.md): Cloudflare Worker and Supabase project created; initial schema applied (209 tables with RLS); no school data loaded. Worker scaffold is not yet connected to Supabase. Versioned SQL files are pending repository synchronization and clean replay validation.
