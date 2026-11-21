@@ -2,7 +2,7 @@
 
 **Date:** 21 November 2026  
 **Status:** Proposed review aid; documentation only.  
-**Authority:** Complete Combined Master Plan v3.0; database data dictionaries; relationship specification; constraints/indexes/RLS; all 13 accepted design decisions; implementation roadmap. The main [Schema Blueprint](schema-blueprint.md) and [Migration Manifest](migration-manifest.md) are the detailed design sources. This file is a release-readiness review checklist, not a replacement or implementation specification.
+**Authority:** Complete Combined Master Plan v3.0; database data dictionaries; relationship specification; constraints/indexes/RLS; all 13 accepted design decisions; implementation roadmap. The main [Schema Blueprint](schema-blueprint.md), [Table-level reconciliation and security review](schema-blueprint-table-level-review.md), and [Migration Manifest](migration-manifest.md) are the detailed design sources. This file is a release-readiness review checklist, not a replacement or implementation specification.
 
 ## Review baseline
 
@@ -78,7 +78,7 @@ For **every entity table** in the main blueprint, the schema reviewer must sign 
 
 ## Dependencies and manifest
 
-Use the ordered migration groups in [migration-manifest.md](migration-manifest.md) (0001–0019). Dependencies are: reference/conventions → tenant root → identity → authorization/audit → file metadata → people → academics → attendance → assessment → admissions → school finance core → CMS → communications/portals → advanced accounting → restricted records → optional services → SaaS billing → governance/support → localization. Review cycles (student photo/file, CMS domain, application conversion) by nullable initial reference and later constraint migration or safe service orchestration, never unchecked polymorphic IDs. RLS/grants are applied before exposure in each migration.
+Use the ordered logical groups in [migration-manifest.md](migration-manifest.md) (D01–D19). They are not actual migration filenames or applied versions. Dependencies are: reference/conventions → tenant root → identity → authorization/audit → file metadata → people → academics → attendance → assessment → admissions → school finance core → CMS → communications/portals → advanced accounting → restricted records → optional services → SaaS billing → governance/support → localization. Review cycles (student photo/file, CMS domain, application conversion) by nullable initial reference and later constraint migration or safe service orchestration, never unchecked polymorphic IDs. RLS/grants are applied before exposure in each migration.
 
 ## Unresolved items — review required
 
@@ -97,3 +97,11 @@ Use the ordered migration groups in [migration-manifest.md](migration-manifest.m
 ## Approval boundary
 
 Checklist items remain **Pending** until reviewed and evidence recorded. This is documentation only. It does not create or authorize SQL, migrations, schema execution, seed data, app code, CI, infrastructure, or deployment.
+
+
+## Documentation reconciliation update (21 November 2026)
+
+- Canonical table names are aligned with the dictionaries; previous aliases and omitted grouped tables are recorded in the table-level review addendum.
+- A duplicate empty grade_levels heading was removed from the academics dictionary; duplicated CMS blueprint rows were removed.
+- D01–D19 are logical dependency labels only. Existing live bootstrap migration history must be reconciled before any future SQL is authored.
+- **Review work complete:** naming and grouped-table inventory. **Implementation readiness remains pending:** baseline diff/replay, exact constraints/FK actions, policy/grant tests, provider/legal/operational evidence and pilot acceptance.
