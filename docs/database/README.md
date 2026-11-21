@@ -84,3 +84,12 @@ Technical recommendations are approved as the baseline. This is not implementati
 - [Detailed workflows and acceptance criteria](pilot-workflows-user-stories-acceptance-criteria.md): 18 pilot workflows, persona-based user stories, testable acceptance criteria, exception paths, cross-workflow safety rules and validation protocol.
 - [Validation and sign-off plan](pilot-workflow-validation-signoff.md): stakeholder review checklist, validation sessions, outcome log and proposed sign-off gates.
 - **Pending:** product owner and pilot-school validation; acceptance criteria are draft and have not been tested. Documentation only; implementation not authorized.
+
+
+## Stage 4 planning status (21 November 2026)
+
+- [Prioritized pilot backlog and sprint planning proposal](stage-4-prioritized-pilot-backlog-sprint-plan.md): 24 backlog items, dependency notes, proposed Sprint 0–7 sequence, Definition of Ready/Done and decisions requiring validation.
+- [Test-case inventory and quality strategy](stage-4-test-case-inventory.md): 45 proposed scenarios, severity guidance, test suites and evidence record. No tests executed.
+- [Pilot data import and migration plan](stage-4-data-import-plan.md): source inventory, batch order, mapping, dry-run, reconciliation, cutover and recovery. No school data processed.
+- [Implementation readiness gate](stage-4-implementation-readiness-gate.md): proposed GO / GO WITH CONDITIONS / NO-GO evidence gate and signoff roles.
+- **Stage 4 outcome:** planning documents drafted and committed for review. Implementation readiness remains **NO-GO** pending stakeholder validation, required evidence and explicit authorization. Documentation only; no code, migrations, CI, infrastructure, deployment or imports created.
