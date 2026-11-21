@@ -97,4 +97,4 @@ The user explicitly authorized initial infrastructure and database implementatio
 
 ## Live implementation status (21 November 2026)
 
-- [Live project bootstrap and migration status](live-project-bootstrap-status.md): Cloudflare Worker and Supabase project created; initial schema applied (209 tables with RLS); no school data loaded. Worker scaffold is not yet connected to Supabase. Versioned SQL files are pending repository synchronization and clean replay validation.
+- [Live project bootstrap and migration status](live-project-bootstrap-status.md): Cloudflare Worker and Supabase project created; initial schema applied (209 tables with RLS), 12 migrations, and 18 role templates; no school data loaded. Worker scaffold is not yet connected to Supabase. Versioned SQL files are pending repository synchronization and clean replay validation.
