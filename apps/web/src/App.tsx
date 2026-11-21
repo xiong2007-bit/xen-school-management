@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Activity, ArrowUpRight, BookOpen, CalendarCheck, GraduationCap, LayoutDashboard, LogOut, Search, ShieldCheck, Users , ChevronDown, CircleHelp, Bell, Menu, School as SchoolIcon, LockKeyhole, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { Activity, ArrowUpRight, BookOpen, CalendarCheck, GraduationCap, LayoutDashboard, LogOut, Search, ShieldCheck, Users , ChevronDown, CircleHelp, Bell, Menu, School as SchoolIcon, LockKeyhole, AlertCircle, Loader2, RefreshCw, X } from "lucide-react";
 import { supabase, supabaseConfigured, loadSchoolWorkspace, type School, type Student, type SchoolClass, type Attendance } from "./lib/supabase";
 
 type Tab = "overview" | "students" | "classes" | "attendance" | "settings";
