@@ -6,6 +6,7 @@ XEN SCHOOL MANAGEMENT is a multi-tenant school-management SaaS for Zimbabwe-firs
 
 **Frontend foundation committed:** React + TypeScript + Vite workspace under `apps/web` (read-only dashboard; deployment currently blocked by Vercel provisioning).
 - Supabase email/password authentication (sign in and account creation).
+- First-time onboarding: verified user can create a school; the database RPC creates school, membership, and initial school-owner role.
 - Authenticated school workspace selector/profile.
 - School overview metrics.
 - Learner directory with search.
