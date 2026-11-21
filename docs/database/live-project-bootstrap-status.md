@@ -17,7 +17,7 @@
 
 ## Database implementation status
 
-Nine migrations were applied in the Supabase project:
+Twelve migrations were applied in the Supabase project:
 
 1. `0001_foundation_people_academics_attendance_assessment`
 2. `0002_admissions_school_finance_core`
@@ -28,12 +28,17 @@ Nine migrations were applied in the Supabase project:
 7. `0007_foreign_key_indexes`
 8. `0008_rls_membership_helper_fix`
 9. `0009_additional_blueprint_tables`
+10. `0010_global_role_and_permission_catalog`
+11. `0011_default_role_permission_templates`
+12. `0012_currency_reference_seed`
 
 Verified snapshot:
 
 - **209 public tables**
 - **209/209 tables have RLS enabled**
-- **170 public policies**, including **163 tenant-select policies**
+- **171 public policies**, including **163 tenant-select policies**
+- **18 global role templates, 45 permissions and 123 role-permission template mappings** seeded; templates do not grant access until explicitly assigned.
+- **11 currency reference rows** seeded (USD, ZWG, ZAR, GBP, EUR and others).
 - **Zero school data rows were imported or seeded**
 - Security advisor currently reports 40 informational tables with RLS enabled and no client policies. These are intentionally fail-closed platform, audit, operations, or restricted-record tables; permissions must be designed before access is opened.
 - Health advisor reports no lints.
