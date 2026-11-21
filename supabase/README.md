@@ -22,7 +22,7 @@ Snapshot limitations: reconstructed columns/defaults, constraints, indexes, RLS 
 - no school or student records loaded
 
 ## API
-Cloudflare Worker `xen-school` uses Supabase publishable key binding plus user JWT for authenticated routes. It is a starter API, not a production API. No service-role key is used or exposed.
+Cloudflare Worker `xen-school` is deployed with `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` secret bindings. Starter routes: `GET /health`, `GET /api/v1/me` (Supabase Auth JWT verification), and `GET /api/v1/schools` (read-only request using caller JWT and database RLS). Only GET/OPTIONS are accepted; writes are not implemented. No service-role key is used or exposed. Deployment was confirmed via Cloudflare API; live HTTP smoke test remains pending.
 
 ## Important
 The database is not production-ready. Write policies and workflow validation remain closed/unimplemented. Some optional modules are flexible `record_data` JSONB placeholders. Restricted health/safeguarding tables have no client access policies. Security, migration replay, tests, app UI and pilot signoff remain pending.
